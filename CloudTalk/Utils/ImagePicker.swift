@@ -10,6 +10,7 @@ import SwiftUI
 struct ImagePicker: UIViewControllerRepresentable {
     
     @Binding var image: UIImage?
+    @Binding var isLoading: Bool
     
     private let controller = UIImagePickerController()
     
@@ -27,10 +28,12 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             parent.image = info[.originalImage] as? UIImage
+            parent.isLoading = false
             picker.dismiss(animated: true)
         }
         
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.isLoading = false
             picker.dismiss(animated: true)
         }
         

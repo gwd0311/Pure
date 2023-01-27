@@ -16,3 +16,4 @@ let KEY_REGION = "region"
 let KEY_INTRODUCTION = "introduction"
 let KEY_PROFILE_IMAGE_URL = "profileImageUrl"
 let KEY_TIMESTAMP = "timestamp"
+

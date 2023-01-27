@@ -13,6 +13,7 @@ struct PhoneAuthView: View {
     
     @State private var showAlert = false
     @State private var showVerificationView = false
+    @State private var isLoading = false
     
     var body: some View {
         NavigationView {
@@ -47,7 +48,11 @@ struct PhoneAuthView: View {
             .onReceive(viewModel.$showVerificationView) { showVerificationView in
                 self.showVerificationView = showVerificationView
             }
+            .onReceive(viewModel.$isLoading) { isLoading in
+                self.isLoading = isLoading
+            }
         }
+        .overlay(isLoading ? LoadingView() : nil)
     }
     
     private var titlePart: some View {

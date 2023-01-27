@@ -8,8 +8,22 @@
 import SwiftUI
 
 struct ColorManager {
+    static let black50 = Color("black50")
+    static let black100 = Color("black100")
+    static let black200 = Color("black200")
+    static let black300 = Color("black300")
+    static let black400 = Color("black400")
+    static let black500 = Color("black500")
+    static let black600 = Color("black600")
     
     static let phoneLoginColor = Color("phoneLoginButtonColor")
     static let mainColor = Color("mainColor")
-    
+    static let backgroundColor = Color("backgroundColor")
+    static let shadow = Color("shadow")
+    static let divider = Color("divider")
+    static let blue = Color("blue")
+    static let pink = Color("pink")
+    static let tabBar = Color("tabBar")
+    static let off = Color("off")
+    static let redLight = Color("redLight")
 }

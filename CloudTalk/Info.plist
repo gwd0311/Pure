@@ -18,6 +18,9 @@
 		<string>CookieRun Regular.otf</string>
 		<string>CookieRun Bold.otf</string>
 		<string>CookieRun Black.otf</string>
+		<string>GmarketSansLight.otf</string>
+		<string>GmarketSansMedium.otf</string>
+		<string>GmarketSansBold.otf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

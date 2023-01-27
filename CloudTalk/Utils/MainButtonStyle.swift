@@ -14,12 +14,12 @@ struct MainButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-            .font(.system(size: 20))
+            .font(.system(size: 18, weight: .bold))
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding()
             .background(color)
-            .cornerRadius(20)
+            .cornerRadius(14)
             .scaleEffect(configuration.isPressed ? 0.8 : 1.0)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
     }

@@ -13,11 +13,12 @@ class RegistrationViewModel: ObservableObject {
     
     @Published var image: UIImage?
     @Published var nickname: String?
-    @Published var gender: String?
+    @Published var gender: Gender?
     @Published var age: String?
-    @Published var region: String?
+    @Published var region: Region?
     @Published var introduction: String?
     @Published var showSheet = false
+    @Published var isLoading = false
     
     private var isComplete: Bool {
         if nickname != nil && gender != nil && age != nil && region != nil && introduction != nil {
@@ -27,7 +28,7 @@ class RegistrationViewModel: ObservableObject {
         }
     }
     
-    let regions = ["서울", "대전", "대구", "부산", "인천", "광주", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주", "외국"]
+    // ["서울", "대전", "대구", "부산", "인천", "광주", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주", "외국"]
     
     func setNickName(nickname: String) {
         self.showSheet = false
@@ -38,9 +39,9 @@ class RegistrationViewModel: ObservableObject {
         self.showSheet = false
         switch selectedIndex {
         case 1:
-            self.gender = "남성"
+            self.gender = .man
         case 2:
-            self.gender = "여성"
+            self.gender = .woman
         default:
             break
         }
@@ -53,7 +54,7 @@ class RegistrationViewModel: ObservableObject {
     
     func setRegion(selectedIndex: Int) {
         self.showSheet = false
-        self.region = regions[selectedIndex]
+        self.region = Region.allCases[selectedIndex]
     }
     
     func setIntroduction(introduction: String) {
@@ -61,8 +62,8 @@ class RegistrationViewModel: ObservableObject {
         self.introduction = introduction
     }
     
-    func register() {
-        
+    func register(completion: @escaping () -> Void) {
+                
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         guard let nickname = nickname,
@@ -76,9 +77,9 @@ class RegistrationViewModel: ObservableObject {
         
         let data: [String: Any] = [
             KEY_NICKNAME: nickname,
-            KEY_GENDER: gender,
+            KEY_GENDER: gender.rawValue,
             KEY_AGE: age,
-            KEY_REGION: region,
+            KEY_REGION: region.rawValue,
             KEY_INTRODUCTION: introduction,
             KEY_PROFILE_IMAGE_URL: "",
             KEY_TIMESTAMP: Timestamp(date: Date())
@@ -89,21 +90,23 @@ class RegistrationViewModel: ObservableObject {
                 print(err.localizedDescription)
                 return
             }
-            print("등록에 성공했습니다.")
-        }
-        
-        if let image = image {
-            ImageUploader.uploadImage(image: image) { imageUrl in
-                let data = [KEY_PROFILE_IMAGE_URL: imageUrl]
+            
+            if let image = self.image {
+                ImageUploader.uploadImage(image: image) { imageUrl in
+                    let data = [KEY_PROFILE_IMAGE_URL: imageUrl]
+                    COLLECTION_USERS.document(uid).updateData(data) { _ in
+                        print("이미지 업로드 성공")
+                    }
+                }
+            } else {
+                let data = [KEY_PROFILE_IMAGE_URL: ""]
                 COLLECTION_USERS.document(uid).updateData(data) { _ in
-                    print("이미지 업로드 성공")
+                    print("이미지 사용 안함")
                 }
             }
-        } else {
-            let data = [KEY_PROFILE_IMAGE_URL: ""]
-            COLLECTION_USERS.document(uid).updateData(data) { _ in
-                print("이미지 사용 안함")
-            }
+            
+            print("등록에 성공했습니다.")
+            completion()
         }
 
     }

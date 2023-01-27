@@ -30,8 +30,31 @@ extension Font {
         }
     }
     
+    enum GmarketSans {
+        case light
+        case medium
+        case bold
+        case custom(String)
+        
+        var value: String {
+            switch self {
+            case .light:
+                return "GmarketSansLight"
+            case .medium:
+                return "GmarketSansMedium"
+            case .bold:
+                return "GmarketSansBold"
+            case .custom(let name):
+                return name
+            }
+        }
+    }
+    
     static func cookieRun(_ type: CookieRun, size: CGFloat = 17) -> Font {
         return .custom(type.value, size: size)
     }
     
+    static func gmarketSans(_ type: GmarketSans, size: CGFloat = 17) -> Font {
+        return .custom(type.value, size: size)
+    }
 }

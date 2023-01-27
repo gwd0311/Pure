@@ -18,8 +18,8 @@ struct RegionSheetView: View {
             Form {
                 Section("지역") {
                     Picker(selection: $selectedIndex, label: Text("")) {
-                        ForEach(0..<viewModel.regions.count, id: \.self) { index in
-                            Text(viewModel.regions[index]).tag(index)
+                        ForEach(0..<Region.allCases.count, id: \.self) { index in
+                            Text(Region.allCases[index].title).tag(index)
                         }
                     }
                     .pickerStyle(.wheel)
@@ -32,7 +32,7 @@ struct RegionSheetView: View {
             })
             .onAppear {
                 guard let region = viewModel.region else { return }
-                guard let index = viewModel.regions.firstIndex(of: region) else { return }
+                guard let index = Region.allCases.firstIndex(of: region) else { return }
                 self.selectedIndex = index
             }
         }

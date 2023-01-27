@@ -12,24 +12,30 @@ struct VerificationView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     
     @State private var showAlert = false
+    @State private var isLoading = false
     
     var body: some View {
         VStack {
-            titlePart
-            
-            inputPart
-            
-            verifyButton
-            
-            Spacer()
-        }
-        .alert("알림", isPresented: $showAlert, actions: {
-            
-        }, message: {
-            Text(viewModel.alertMsg)
-        })
-        .onReceive(viewModel.$showAlert) { showAlert in
-            self.showAlert = showAlert
+            VStack {
+                titlePart
+                
+                inputPart
+                
+                verifyButton
+                
+                Spacer()
+            }
+            .alert("알림", isPresented: $showAlert, actions: {
+
+            }, message: {
+                Text(viewModel.alertMsg)
+            })
+            .onReceive(viewModel.$showAlert) { showAlert in
+                self.showAlert = showAlert
+            }
+            .onReceive(viewModel.$isLoading) { isLoading in
+                self.isLoading = isLoading
+            }
         }
     }
     
@@ -97,5 +103,6 @@ struct VerificationView: View {
 struct VerificationView_Previews: PreviewProvider {
     static var previews: some View {
         VerificationView()
+            .environmentObject(AuthViewModel())
     }
 }

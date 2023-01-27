@@ -10,19 +10,37 @@ import SwiftUI
 struct ContentView: View {
     
     @EnvironmentObject var viewModel: AuthViewModel
+    @State private var isLoading = true
+    
+    init() {
+        UITableView.appearance().showsVerticalScrollIndicator = false
+    }
     
     var body: some View {
-        Group {
-            if viewModel.userSession != nil && viewModel.currentUser != nil {
-                MainTabView()
-            } else if viewModel.userSession != nil {
-                RegistrationView()
-            } else {
-                LoginView()
+        
+        if isLoading {
+            SplashView()
+                .onAppear {
+                    Task {
+                        try? await Task.sleep(nanoseconds: 1_500_000_000)
+                        withAnimation {
+                            isLoading = false
+                        }
+                    }
+                }
+        } else {
+            Group {
+                if viewModel.userSession != nil && viewModel.currentUser != nil {
+                    MainTabView()
+                } else if viewModel.userSession != nil {
+                    RegistrationView()
+                } else {
+                    LoginView()
+                }
             }
-        }
-        .onAppear {
-            print(viewModel.currentUser)
+            .onAppear {
+                print(viewModel.currentUser)
+            }
         }
     }
 }

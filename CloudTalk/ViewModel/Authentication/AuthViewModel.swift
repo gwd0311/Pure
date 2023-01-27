@@ -7,10 +7,11 @@
 
 import Firebase
 import FirebaseAuth
-import FirebaseFirestore
 import SwiftUI
 import CryptoKit
 import AuthenticationServices
+import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 @MainActor
 class AuthViewModel: NSObject, ObservableObject {
@@ -22,9 +23,11 @@ class AuthViewModel: NSObject, ObservableObject {
     @Published var currentUser: User?
     @Published var verificationId: String = ""
     @Published var showVerificationView = false
+    @Published var showTabbar = true
     
     @Published var alertMsg = ""
     @Published var showAlert = false
+    @Published var isLoading = false
     
     static let shared = AuthViewModel()
     
@@ -39,8 +42,9 @@ class AuthViewModel: NSObject, ObservableObject {
         
         let number = "+82\(phoneNumber)"
         
+        self.isLoading = true
         PhoneAuthProvider.provider().verifyPhoneNumber(number, uiDelegate: nil) { code, err in
-            
+            self.isLoading = false
             if err != nil {
                 self.alertMsg = "인증이 잘못되었습니다."
                 withAnimation {
@@ -55,11 +59,12 @@ class AuthViewModel: NSObject, ObservableObject {
     }
     
     func verifyCode() {
-        
         let credential = PhoneAuthProvider.provider().credential(withVerificationID: self.verificationId, verificationCode: verificationCode)
-        
+        self.isLoading = true
         Auth.auth().signIn(with: credential) { result, err in
-            if let _ = err {
+            self.isLoading = false
+            if let err = err {
+                print("Error:: \(err)")
                 self.alertMsg = "인증번호 검증이 잘못되었습니다."
                 withAnimation {
                     self.showAlert.toggle()
@@ -78,9 +83,9 @@ class AuthViewModel: NSObject, ObservableObject {
     func requestCode() {
         
         let number = "+82\(phoneNumber)"
-        
+        self.isLoading = true
         PhoneAuthProvider.provider().verifyPhoneNumber(number, uiDelegate: nil) { code, err in
-            
+            self.isLoading = false
             if err != nil {
                 self.alertMsg = "인증번호 재전송 중 오류가 발생하였습니다."
                 withAnimation {
@@ -101,6 +106,9 @@ class AuthViewModel: NSObject, ObservableObject {
     
     func signOut() {
         self.userSession = nil
+        self.currentUser = nil
+        self.alertMsg = ""
+        self.showAlert = false
         try? Auth.auth().signOut()
     }
     

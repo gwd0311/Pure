@@ -29,12 +29,10 @@ struct GenderSheetView: View {
             .onAppear {
                 if let gender = viewModel.gender {
                     switch gender {
-                    case "남성":
+                    case .man:
                         selectedIndex = 1
-                    case "여성":
+                    case .woman:
                         selectedIndex = 2
-                    default:
-                        break
                     }
                 }
             }

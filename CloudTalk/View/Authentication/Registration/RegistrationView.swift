@@ -10,10 +10,11 @@ import SwiftUI
 struct RegistrationView: View {
     
     @ObservedObject var viewModel = RegistrationViewModel()
-    
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showImagePicker = false
     @State private var currentProfileInfo: ProfileInfo = .nickname
     @State private var showSheet = false
+    @State private var isLoading = false
     
     var body: some View {
         NavigationView {
@@ -29,7 +30,7 @@ struct RegistrationView: View {
                     }
                 }
                 .fullScreenCover(isPresented: $showImagePicker) {
-                    ImagePicker(image: $viewModel.image)
+                    ImagePicker(image: $viewModel.image, isLoading: $isLoading)
                 }
                 .halfSheet(showSheet: $showSheet) {
                     switch currentProfileInfo {
@@ -53,6 +54,7 @@ struct RegistrationView: View {
             }
             .navigationBarItems(trailing: saveButton)
         }
+        .overlay(isLoading ? LoadingView() : nil)
     }
     
     private var titlePart: some View {
@@ -73,6 +75,7 @@ struct RegistrationView: View {
     
     private var imageSelectorButton: some View {
         Button {
+            isLoading = true
             showImagePicker.toggle()
         } label: {
             if let image = viewModel.image {
@@ -82,6 +85,9 @@ struct RegistrationView: View {
                     .frame(width: 150, height: 150)
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .shadow(radius: 5)
+                    .onAppear {
+                        isLoading = false
+                    }
             } else {
                 Image(systemName: "cloud.fill")
                     .font(.system(size: 100))
@@ -121,7 +127,7 @@ struct RegistrationView: View {
                 currentProfileInfo = .gender
                 showSheet.toggle()
             } label: {
-                ProfileInfoView(title: "성별", content: viewModel.gender ?? "입력")
+                ProfileInfoView(title: "성별", content: viewModel.gender?.title ?? "입력")
             }
             Button {
                 currentProfileInfo = .age
@@ -133,7 +139,7 @@ struct RegistrationView: View {
                 currentProfileInfo = .region
                 showSheet.toggle()
             } label: {
-                ProfileInfoView(title: "지역", content: viewModel.region ?? "입력")
+                ProfileInfoView(title: "지역", content: viewModel.region?.title ?? "입력")
             }
             Button {
                 currentProfileInfo = .introduction
@@ -146,7 +152,11 @@ struct RegistrationView: View {
     
     private var saveButton: some View {
         Button {
-            viewModel.register()
+            viewModel.register {
+                withAnimation {
+                    authViewModel.fetchUser()
+                }
+            }
         } label: {
             Text("저장하고 시작하기")
                 .font(.cookieRun(.regular))
