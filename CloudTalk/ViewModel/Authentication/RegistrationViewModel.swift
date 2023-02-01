@@ -14,7 +14,7 @@ class RegistrationViewModel: ObservableObject {
     @Published var image: UIImage?
     @Published var nickname: String?
     @Published var gender: Gender?
-    @Published var age: String?
+    @Published var age: Int?
     @Published var region: Region?
     @Published var introduction: String?
     @Published var showSheet = false
@@ -49,7 +49,7 @@ class RegistrationViewModel: ObservableObject {
     
     func setAge(selectedIndex: Int) {
         self.showSheet = false
-        self.age = String(selectedIndex)
+        self.age = selectedIndex
     }
     
     func setRegion(selectedIndex: Int) {

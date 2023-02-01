@@ -16,50 +16,57 @@ struct MainView: View {
     @State private var refreshed = 0
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                ColorManager.backgroundColor.ignoresSafeArea()
-                Rectangle()
-                    .foregroundColor(ColorManager.black50)
-                    .cornerRadius(36, corners: .topLeft)
-                    .edgesIgnoringSafeArea(.bottom)
-                    .padding(.top, 5)
-                VStack {
-                    Spacer().frame(height: 5)
-                    ScrollView(showsIndicators: false) {
+        ZStack {
+            ColorManager.backgroundColor.ignoresSafeArea()
+            Rectangle()
+                .foregroundColor(ColorManager.black50)
+                .cornerRadius(36, corners: .topLeft)
+                .edgesIgnoringSafeArea(.bottom)
+                .padding(.top, 5)
+            VStack {
+                Spacer().frame(height: 5)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
                         LazyVStack(spacing: 0) {
-                            ForEach(viewModel.users) { user in
-                                UserCell(user: user)
-                                    .padding(.bottom, 12)
-                                    .task {
-                                        await viewModel.fetchMoreUsers(user: user)
-                                    }
+                            Spacer().frame(height: 12)
+                            ForEach(viewModel.queriedUsers) { user in
+                                CustomNavigationLink {
+                                    DetailView(user: user)
+                                } label: {
+                                    UserCell(user: user)
+                                        .padding(.bottom, 12)
+                                        .task {
+                                            await viewModel.fetchMoreUsers(user: user)
+                                        }
+                                }
+                                .id(user.id)
                             }
                             Spacer().frame(height: 100)
                         }
                     }
-                    .refreshable {
-                        viewModel.fetchUsers()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 18)
-                    .cornerRadius(36, corners: .topLeft)
-                    Spacer()
                 }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        titleLabel
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        filterButton
-                    }
+                .refreshable {
+                    viewModel.loadUsers()
                 }
-                .navigationBarHidden(isNavBarHidden)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 18)
+                .cornerRadius(36, corners: .topLeft)
+                Spacer()
             }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    titleLabel
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    filterButton
+                }
+            }
+            
+            .navigationBarHidden(isNavBarHidden)
+            .navigationTitle("")
         }
+        
     }
-    
-    
     
     private var titleLabel: some View {
         Text("구름톡")
@@ -68,10 +75,16 @@ struct MainView: View {
     }
     
     private var filterButton: some View {
+        
         NavigationLink {
-            FilterView(onFilter: { gender, region, startAge, endAge in
-                print(gender, region, startAge, endAge)
-            })
+            FilterView(
+                gender: $viewModel.gender,
+                region: $viewModel.region,
+                ageRange: $viewModel.ageRange,
+                onFilter: { gender, region, ageRange in
+                    viewModel.storeFilterValue(gender: gender, region: region, ageRange: ageRange)
+                    viewModel.loadUsers()
+                })
         } label: {
             Image("filter")
         }

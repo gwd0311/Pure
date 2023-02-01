@@ -13,9 +13,9 @@ struct MainTabView: View {
     @State private var tabIndex: TabIndex = .main
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            selectedView
-            if viewModel.showTabbar {
+        NavigationView {
+            ZStack(alignment: .bottom) {
+                selectedView
                 Group {
                     VStack {
                         Spacer()
@@ -37,6 +37,7 @@ struct MainTabView: View {
                 }
             }
         }
+        .tint(.black)
     }
     
     private var selectedView: some View {
@@ -58,9 +59,7 @@ struct MainTabView: View {
     
     private var mainButton: some View {
         Button {
-            withAnimation {
-                tabIndex = .main
-            }
+            tabIndex = .main
         } label: {
             VStack(spacing: 2) {
                 Image(tabIndex == .main ? "bottom1On" : "bottom1Off")
@@ -74,9 +73,7 @@ struct MainTabView: View {
     
     private var postButton: some View {
         Button {
-            withAnimation {
-                tabIndex = .post
-            }
+            tabIndex = .post
         } label: {
             VStack(spacing: 2) {
                 Image(tabIndex == .post ? "bottom2On" : "bottom2Off")
@@ -90,9 +87,7 @@ struct MainTabView: View {
     
     private var chatButton: some View {
         Button {
-            withAnimation {
-                tabIndex = .chat
-            }
+            tabIndex = .chat
         } label: {
             VStack(spacing: 2) {
                 Image(tabIndex == .chat ? "bottom3On" : "bottom3Off")
@@ -106,9 +101,7 @@ struct MainTabView: View {
     
     private var likeButton: some View {
         Button {
-            withAnimation {
-                tabIndex = .like
-            }
+            tabIndex = .like
         } label: {
             VStack(spacing: 2) {
                 Image(tabIndex == .like ? "bottom4On" : "bottom4Off")
@@ -122,9 +115,7 @@ struct MainTabView: View {
     
     private var settingsButton: some View {
         Button {
-            withAnimation {
-                tabIndex = .settings
-            }
+            tabIndex = .settings
         } label: {
             VStack(spacing: 2) {
                 Image(tabIndex == .settings ? "bottom5On" : "bottom5Off")

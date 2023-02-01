@@ -13,7 +13,7 @@ struct User: Identifiable, Decodable {
     @DocumentID var id: String?
     var nickname: String
     var gender: Gender
-    var age: String
+    var age: Int
     var region: Region
     var introduction: String
     var profileImageUrl: String
@@ -101,7 +101,7 @@ enum Region: Int, CaseIterable, Codable, Identifiable {
 let MOCK_USER = User(
     nickname: "여잼",
     gender: .woman,
-    age: "24",
+    age: 24,
     region: .daejeon,
     introduction: "앙 애니 기모띠 애니 개꿀잼 인정?",
     profileImageUrl: "",

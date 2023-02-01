@@ -133,7 +133,7 @@ struct RegistrationView: View {
                 currentProfileInfo = .age
                 showSheet.toggle()
             } label: {
-                ProfileInfoView(title: "나이", content: viewModel.age ?? "입력")
+                ProfileInfoView(title: "나이", content: viewModel.age != nil ? String(viewModel.age ?? 0) : "입력")
             }
             Button {
                 currentProfileInfo = .region

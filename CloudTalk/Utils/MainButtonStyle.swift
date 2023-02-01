@@ -20,8 +20,8 @@ struct MainButtonStyle: ButtonStyle {
             .padding()
             .background(color)
             .cornerRadius(14)
-            .scaleEffect(configuration.isPressed ? 0.8 : 1.0)
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .opacity(configuration.isPressed ? 0.92 : 1.0)
     }
     
 }

@@ -8,15 +8,11 @@
 import SwiftUI
 
 struct FilterView: View {
-    
-    @EnvironmentObject var authViewModel: AuthViewModel
-    let onFilter: (Gender?, Region?, Int, Int) -> Void
-    @ObservedObject var slider = CustomSlider(start: 18, end: 99)
-    
-    @State private var gender: Gender?
-    @State private var region: Region?
-    @State private var startAge: Int = 18
-    @State private var endAge: Int = 99
+        
+    @Binding var gender: Gender?
+    @Binding var region: Region?
+    @Binding var ageRange: ClosedRange<Float>
+    let onFilter: (_ gender: Gender?, _ region: Region?, _ ageRange: ClosedRange<Float>) -> Void
     @State private var selectedIndex = -1
     
     @Environment(\.dismiss) var dismiss
@@ -38,22 +34,12 @@ struct FilterView: View {
             filterButton
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    authViewModel.showTabbar = true
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.backward")
-                        .foregroundColor(.black)
-                }
-            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     gender = nil
+                    region = nil
                     selectedIndex = -1
-                    startAge = 18
-                    endAge = 99
-                    slider.initialize()
+                    ageRange = 18...99
                 } label: {
                     Text("초기화")
                         .font(.system(size: 16, weight: .bold))
@@ -61,13 +47,16 @@ struct FilterView: View {
                 }
             }
         }
-        .onAppear {
+        .onWillAppear {
             DispatchQueue.main.async {
-                authViewModel.showTabbar = false
+                if let region = region {
+                    selectedIndex = region.rawValue
+                } else {
+                    selectedIndex = -1
+                }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .navigationTitle("친구 검색")
     }
     
@@ -120,8 +109,8 @@ struct FilterView: View {
                 Text("전체").tag(-1)
                 ForEach(Region.allCases) { Text($0.title).tag($0.rawValue) }
             }
-            .onChange(of: selectedIndex, perform: { _ in
-                region = Region(rawValue: selectedIndex) ?? nil
+            .onChange(of: selectedIndex, perform: { newValue in
+                region = newValue != -1 ? Region(rawValue: newValue) : nil
             })
             .pickerStyle(.wheel)
             .padding(.horizontal, 18)
@@ -135,19 +124,13 @@ struct FilterView: View {
                     .font(.system(size: 16))
                     .foregroundColor(ColorManager.black600)
                 Spacer()
-                Text("\(startAge)세 ~ \(endAge)세")
+                Text("\(Int(ageRange.lowerBound))세 ~ \(Int(ageRange.upperBound))세")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(ColorManager.redLight)
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 36)
-            SliderView(slider: slider)
-                .onChange(of: slider.lowHandle.currentValue, perform: { newValue in
-                    self.startAge = Int(newValue)
-                })
-                .onChange(of: slider.highHandle.currentValue, perform: { newValue in
-                    self.endAge = Int(newValue)
-                })
+            RangedSliderView(value: $ageRange, bounds: 18...99)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 36)
         }
@@ -157,9 +140,7 @@ struct FilterView: View {
         Button {
             // 뷰모델에 필터링 값들 넣기
             // 성별, 지역, 시작나이, 끝나이
-            authViewModel.showTabbar = true
-            onFilter(gender, region, Int(slider.lowHandle.currentValue), Int(slider.highHandle.currentValue))
-            
+            onFilter(gender, region, ageRange)
             dismiss()
         } label: {
             Text("필터 적용하기")

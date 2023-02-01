@@ -21,6 +21,13 @@ extension View {
         clipShape( RoundedCorner(radius: radius, corners: corners) )
     }
     
+    func onWillDisappear(_ perform: @escaping () -> Void) -> some View {
+        self.modifier(WillDisappearModifier(callback: perform))
+    }
+    
+    func onWillAppear(_ perform: @escaping () -> Void) -> some View {
+        self.modifier(WillAppearModifier(callback: perform))
+    }
 }
 
 struct RoundedCorner: Shape {

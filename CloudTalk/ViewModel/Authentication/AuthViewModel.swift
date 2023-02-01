@@ -23,7 +23,6 @@ class AuthViewModel: NSObject, ObservableObject {
     @Published var currentUser: User?
     @Published var verificationId: String = ""
     @Published var showVerificationView = false
-    @Published var showTabbar = true
     
     @Published var alertMsg = ""
     @Published var showAlert = false
