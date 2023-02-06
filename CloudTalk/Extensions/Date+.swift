@@ -34,11 +34,18 @@ extension Date {
     
     func isNew() -> Bool {
         let calendar = Calendar.current
-        let diff = Calendar.current.dateComponents([.day], from: self, to: Date()).day ?? 0
+        let diff = calendar.dateComponents([.day], from: self, to: Date()).day ?? 0
         if diff > 0 {
             return false
         } else {
             return true
         }
+    }
+    
+    func formatYmd() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "YYYY.MM.dd HH:MM"
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        return dateFormatter.string(from: self)
     }
 }

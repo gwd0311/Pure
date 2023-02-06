@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct ColorManager {
+    static let black30 = Color("black30")
     static let black50 = Color("black50")
     static let black100 = Color("black100")
     static let black200 = Color("black200")
+    static let black250 = Color("black250")
     static let black300 = Color("black300")
     static let black400 = Color("black400")
     static let black500 = Color("black500")
@@ -26,4 +28,6 @@ struct ColorManager {
     static let tabBar = Color("tabBar")
     static let off = Color("off")
     static let redLight = Color("redLight")
+    static let blueLight = Color("blueLight")
+    static let red = Color("red")
 }

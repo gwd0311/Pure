@@ -46,9 +46,9 @@ struct MainTabView: View {
             case .main:
                 MainView()
             case .post:
-                Text("postView")
+                PostView()
             case .chat:
-                Text("chatView")
+                ChatView()
             case .like:
                 Text("likeView")
             case .settings:

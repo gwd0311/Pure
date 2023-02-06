@@ -13,7 +13,6 @@ import AuthenticationServices
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-@MainActor
 class AuthViewModel: NSObject, ObservableObject {
     
     @Published var nonce = ""

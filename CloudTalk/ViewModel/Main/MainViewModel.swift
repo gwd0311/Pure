@@ -9,7 +9,6 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
-
 class MainViewModel: ObservableObject {
     
     @Published var users = [User]()
@@ -96,7 +95,7 @@ class MainViewModel: ObservableObject {
     
     func fetchMoreUsers(user: User) async {
         guard user.id == users.last?.id else { return }
-        guard let lastDoc = try? await COLLECTION_USERS.document(users.last?.id ?? "").getDocument() else { return DocumentSnapshot.initialize() }
+        guard let lastDoc = try? await COLLECTION_USERS.document(queriedUsers.last?.id ?? "").getDocument() else { return DocumentSnapshot.initialize() }
         
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
@@ -124,6 +123,7 @@ class MainViewModel: ObservableObject {
         defaults.setValue(region?.rawValue ?? -1, forKey: DEFAULTS_MAIN_REGION)
         defaults.setValue(ageRange.lowerBound, forKey: DEFAULTS_MAIN_AGERANGE_LOWERBOUND)
         defaults.setValue(ageRange.upperBound, forKey: DEFAULTS_MAIN_AGERANGE_UPPERBOUND)
-                
+        self.queriedUsers.removeAll()
+        self.users.removeAll()
     }
 }

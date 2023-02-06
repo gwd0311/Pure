@@ -99,10 +99,7 @@ class RegistrationViewModel: ObservableObject {
                     }
                 }
             } else {
-                let data = [KEY_PROFILE_IMAGE_URL: ""]
-                COLLECTION_USERS.document(uid).updateData(data) { _ in
-                    print("이미지 사용 안함")
-                }
+                print("이미지 사용 안함")
             }
             
             print("등록에 성공했습니다.")

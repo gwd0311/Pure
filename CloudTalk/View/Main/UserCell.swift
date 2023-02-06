@@ -18,7 +18,7 @@ struct UserCell: View {
             Group {
                 if !user.profileImageUrl.isEmpty {
                     Color.clear
-                        .aspectRatio(contentMode: .fit)
+                        .aspectRatio(contentMode: .fill)
                         .overlay(
                             KFImage(URL(string: user.profileImageUrl))
                                 .resizable()
@@ -29,12 +29,12 @@ struct UserCell: View {
                 } else if user.gender == .man {
                     Image("man")
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .cornerRadius(12)
                 } else {
                     Image("woman")
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .cornerRadius(12)
                 }
             }

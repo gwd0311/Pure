@@ -15,41 +15,44 @@ struct DetailView: View {
     @State private var showDialog = false
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading) {
 
-            imageSection
-            upperContent
-            lowerContent
-            
-            Spacer()
-            
+                    imageSection
+                    upperContent
+                    lowerContent
+                    
+                    Spacer()
+                }
+                .confirmationDialog("Select", isPresented: $showDialog, actions: {
+                    Button {
+                        // 차단하기 기능 구현
+                        
+                    } label: {
+                        Text("차단하기")
+                    }
+                    Button {
+                        // 신고하기 기능 구현
+                        
+                    } label: {
+                        Text("신고하기")
+                    }
+                })
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+
+                        } label: {
+                            Image("more")
+                        }
+                    }
+                }
+                .navigationTitle(user.nickname)
+                .navigationBarTitleDisplayMode(.inline)
+            }
             bottomContent
         }
-        .confirmationDialog("Select", isPresented: $showDialog, actions: {
-            Button {
-                // 차단하기 기능 구현
-                
-            } label: {
-                Text("차단하기")
-            }
-            Button {
-                // 신고하기 기능 구현
-                
-            } label: {
-                Text("신고하기")
-            }
-        })
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-
-                } label: {
-                    Image("more")
-                }
-            }
-        }
-        .navigationTitle(user.nickname)
-        .navigationBarTitleDisplayMode(.inline)
         .customNavBarItems(trailing: moreButton)
         .customNavigationTitle(user.nickname)
     }
@@ -62,18 +65,22 @@ struct DetailView: View {
                     .overlay(
                         KFImage(URL(string: user.profileImageUrl))
                             .resizable()
+                            .frame(maxWidth: .infinity)
                             .scaledToFill()
                     )
+                    .frame(maxWidth: .infinity)
                     .clipShape(Rectangle())
                     .contentShape(Rectangle())
             } else if user.gender == .man {
                 Image("man")
                     .resizable()
                     .scaledToFit()
+                    .frame(maxWidth: .infinity)
             } else {
                 Image("woman")
                     .resizable()
                     .scaledToFit()
+                    .frame(maxWidth: .infinity)
             }
         }
         .padding(.bottom, 24)

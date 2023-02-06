@@ -9,6 +9,10 @@ import SwiftUI
 
 extension View {
     
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
     func halfSheet<SheetView: View>(showSheet: Binding<Bool>, @ViewBuilder sheetView: @escaping () -> SheetView, onEnd: @escaping () -> Void) -> some View {
         
         return self
@@ -27,6 +31,15 @@ extension View {
     
     func onWillAppear(_ perform: @escaping () -> Void) -> some View {
         self.modifier(WillAppearModifier(callback: perform))
+    }
+    
+    // textEditor 배경색 없애기
+    func textEditorBackground<V>(@ViewBuilder _ content: () -> V) -> some View where V : View {
+        self
+            .onAppear {
+                UITextView.appearance().backgroundColor = .clear
+            }
+            .background(content())
     }
 }
 
