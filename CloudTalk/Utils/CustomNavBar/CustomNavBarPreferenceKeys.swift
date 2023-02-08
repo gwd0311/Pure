@@ -90,7 +90,8 @@ extension View {
     
 }
 
-extension UINavigationController: ObservableObject, UIGestureRecognizerDelegate {
+extension UINavigationController: ObservableObject, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
+    
     override open func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self

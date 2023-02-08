@@ -15,6 +15,7 @@ struct MainTabView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
+                Color.white.edgesIgnoringSafeArea(.all)
                 selectedView
                 Group {
                     VStack {
@@ -24,6 +25,7 @@ struct MainTabView: View {
                             .frame(height: 58)
                             .shadow(color: ColorManager.shadow.opacity(0.08), radius: 4, x: 0, y: 1)
                     }
+                    .padding(.bottom, 20)
                     HStack(spacing: 0) {
                         mainButton
                         postButton
@@ -33,9 +35,14 @@ struct MainTabView: View {
                     }
                     .frame(height: 58)
                     .frame(maxWidth: .infinity)
+                    .padding(.bottom, 20)
                     .background(ColorManager.tabBar)
                 }
             }
+            .onWillAppear {
+                // 하단 safeArea 하얀색으로 바꾸기
+            }
+            .edgesIgnoringSafeArea(.bottom)
         }
         .tint(.black)
     }
@@ -48,7 +55,7 @@ struct MainTabView: View {
             case .post:
                 PostView()
             case .chat:
-                ChatView()
+                ChatView(viewModel: ChatViewModel())
             case .like:
                 Text("likeView")
             case .settings:

@@ -33,20 +33,6 @@ struct FilterView: View {
             Spacer()
             filterButton
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    gender = nil
-                    region = nil
-                    selectedIndex = -1
-                    ageRange = 18...99
-                } label: {
-                    Text("초기화")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(ColorManager.black300)
-                }
-            }
-        }
         .onWillAppear {
             DispatchQueue.main.async {
                 if let region = region {
@@ -56,8 +42,23 @@ struct FilterView: View {
                 }
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("친구 검색")
+        .customNavigationTitle("친구 검색")
+        .customNavBarItems(trailing: trailingButton)
+        .navigationBarHidden(true)
+        .navigationTitle("")
+    }
+    
+    private var trailingButton: some View {
+        Button {
+            gender = nil
+            region = nil
+            selectedIndex = -1
+            ageRange = 18...99
+        } label: {
+            Text("초기화")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(ColorManager.black300)
+        }
     }
     
     private var genderPart: some View {

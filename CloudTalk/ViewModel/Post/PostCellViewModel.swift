@@ -21,10 +21,12 @@ class PostCellViewModel: ObservableObject {
     init(post: Post) {
         self.post = post
         self.isHeartPressed = post.likeUids.contains(where: { $0 == AuthViewModel.shared.currentUser?.id })
-        self.heartCount = post.likeCount
-        self.commentCount = post.commentCount
+        self.heartCount = post.likeUids.count
         Task {
             await loadData()
+            DispatchQueue.main.async {
+                self.commentCount = self.comments.count
+            }
         }
     }
     

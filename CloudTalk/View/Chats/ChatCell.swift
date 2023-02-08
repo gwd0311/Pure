@@ -10,7 +10,14 @@ import Kingfisher
 
 struct ChatCell: View {
     
-    let viewModel: ChatCellViewModel
+    @ObservedObject var viewModel: ChatCellViewModel
+    
+    private let chat: Chat
+    
+    init(chat: Chat) {
+        self.chat = chat
+        self.viewModel = ChatCellViewModel(chat: chat)
+    }
     
     var body: some View {
         let chat = viewModel.chat
@@ -31,10 +38,14 @@ struct ChatCell: View {
                             }
                             HStack(spacing: 0) {
                                 Text(chat.lastMessage)
+                                    .lineLimit(1)
                                     .font(.system(size: 15, weight: .light))
                                     .foregroundColor(ColorManager.black300)
+                                    .frame(maxWidth: 232, alignment: .leading)
                                 Spacer()
-                                makeBadge(num: chat.unReadMessageCount)
+                                if chat.unReadMessageCount > 0 {
+                                    makeBadge(num: chat.unReadMessageCount)
+                                }
                             }
                         }
                     }
@@ -49,7 +60,9 @@ struct ChatCell: View {
                         .foregroundColor(ColorManager.black50)
                 }
             }
+            .background(.white)
         }
+        
         
     }
     
@@ -98,6 +111,6 @@ struct ChatCell: View {
 
 struct ChatCell_Previews: PreviewProvider {
     static var previews: some View {
-        ChatCell(viewModel: ChatCellViewModel(chat: MOCK_CHAT))
+        ChatCell(chat: MOCK_CHAT)
     }
 }

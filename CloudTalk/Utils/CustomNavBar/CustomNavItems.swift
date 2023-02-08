@@ -11,22 +11,35 @@ struct CustomNavigationLink<Label: View, Destination: View>: View {
 
     let destination: Destination
     let label: Label
+    let isActive: Binding<Bool>?
 
-    init(@ViewBuilder destination: () -> Destination, @ViewBuilder label: () -> Label) {
+    init(@ViewBuilder destination: () -> Destination, isActive: Binding<Bool>? = nil, @ViewBuilder label: () -> Label) {
         self.destination = destination()
         self.label = label()
+        self.isActive = isActive
     }
 
     var body: some View {
-        NavigationLink {
-            CustomNavBarContainerView {
-                destination
+        if let isActive = isActive {
+            NavigationLink(
+                destination: CustomNavBarContainerView {
+                    destination
+                }
+                .navigationBarHidden(true),
+                isActive: isActive,
+                label: {
+                    label
+                })
+        } else {
+            NavigationLink {
+                CustomNavBarContainerView {
+                    destination
+                }
+                .navigationBarHidden(true)
+            } label: {
+                label
             }
-            .navigationBarHidden(true)
-        } label: {
-            label
         }
-
     }
 }
 

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "cloud_sad1x.png",
+      "filename" : "cloud_x1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "cloud_sad2x.png",
+      "filename" : "cloud_x2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "cloud_sad3x.png",
+      "filename" : "cloud_x3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Firebase
 
 class SendMessageViewModel: ObservableObject {
     
@@ -16,17 +17,34 @@ class SendMessageViewModel: ObservableObject {
         self.user = user
     }
     
-    func sendNewMessage(text: String) async {
-        
-        // TODO: - COLLECTION_CHATS에 채팅목록 세팅하기
-        // TODO: - COLLECTION_CHATS - collection("messages")에 메시지 목록 세팅하기
-        
+    func setChats(text: String) async {
         guard let fromId = AuthViewModel.shared.currentUser?.id else { return }
         guard let toId = user.id else { return }
+
         let data: [String: Any] = [
-            :
+            KEY_UIDS: [fromId, toId],
+            KEY_LASTMESSAGE: text,
+            KEY_UNREADMESSAGECOUNT: 0,
+            KEY_TIMESTAMP: Timestamp(date: Date())
         ]
-        try? await COLLECTION_CHATS.document().setData(data)
+        
+        let ref = COLLECTION_CHATS.document()
+        let docId = ref.documentID
+        try? await ref.setData(data)
+        await setMessages(text: text, docId: docId)
     }
     
+    private func setMessages(text: String, docId: String) async {
+        guard let fromId = AuthViewModel.shared.currentUser?.id else { return }
+        guard let toId = user.id else { return }
+        
+        let data: [String: Any] = [
+            KEY_FROMID: fromId,
+            KEY_TOID: toId,
+            KEY_ISREAD: false,
+            KEY_TEXT: text,
+            KEY_TIMESTAMP: Timestamp(date: Date())
+        ]
+        try? await COLLECTION_CHATS.document(docId).collection("messages").document().setData(data)
+    }
 }

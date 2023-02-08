@@ -31,7 +31,7 @@ struct MainView: View {
                             Spacer().frame(height: 12)
                             ForEach(viewModel.queriedUsers) { user in
                                 CustomNavigationLink {
-                                    DetailView(user: user)
+                                    DetailView(viewModel: DetailViewModel(user: user))
                                 } label: {
                                     UserCell(user: user)
                                         .padding(.bottom, 12)
@@ -53,6 +53,8 @@ struct MainView: View {
                 .cornerRadius(36, corners: .topLeft)
                 Spacer()
             }
+            .navigationBarTitle("", displayMode: .inline)
+//            .navigationBarHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     titleLabel
@@ -61,11 +63,7 @@ struct MainView: View {
                     filterButton
                 }
             }
-            
-            .navigationBarHidden(isNavBarHidden)
-            .navigationTitle("")
         }
-        
     }
     
     private var titleLabel: some View {

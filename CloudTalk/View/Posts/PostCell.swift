@@ -30,7 +30,7 @@ struct PostCell: View {
                     HStack(spacing: 0) {
                         CustomNavigationLink {
                             if let user = viewModel.user {
-                                DetailView(user: user)
+                                DetailView(viewModel: DetailViewModel(user: user))
                             }
                         } label: {
                             profileImage
@@ -112,7 +112,7 @@ struct PostCell: View {
             CustomNavigationLink {
                 // 뷰모델에서 user만들어서 가져와야할듯..
                 if let user = viewModel.user {
-                    DetailView(user: user)
+                    DetailView(viewModel: DetailViewModel(user: user))
                 }
             } label: {
                 Group {
@@ -139,7 +139,7 @@ struct PostCell: View {
     private var profileDetailInfo: some View {
         CustomNavigationLink {
             if let user = viewModel.user {
-                DetailView(user: user)
+                DetailView(viewModel: DetailViewModel(user: user))
             }
         } label: {
             HStack(spacing: 2) {
@@ -195,7 +195,7 @@ struct PostCell: View {
                     Text("좋아요")
                     Text(viewModel.heartCount.description)
                     Text("댓글")
-                    Text(post.commentCount.description)
+                    Text(viewModel.comments.count.description)
                 }
                 .font(.system(size: 13, weight: .light))
                 .foregroundColor(ColorManager.black250)

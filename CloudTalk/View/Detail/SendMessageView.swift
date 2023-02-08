@@ -9,22 +9,23 @@ import SwiftUI
 import Kingfisher
 
 struct SendMessageView: View {
-    
+    @Environment(\.rootPresentationMode) private var rootPresentationMode: Binding<RootPresentationMode>
     @ObservedObject var viewModel: SendMessageViewModel
+    let onDimiss: () -> Void
     @State private var text = ""
     @State private var isLoading = false
-    @State private var showConversationView = false
     
     var body: some View {
+        let user = viewModel.user
         VStack(spacing: 0) {
             Spacer()
             profileImage
                 .padding(.bottom, 14)
             HStack(spacing: 4) {
-                Text(viewModel.user.nickname)
+                Text(user.nickname)
                     .foregroundColor(ColorManager.blue)
                     .font(.system(size: 18, weight: .bold))
-                Text("\(viewModel.user.age)세 \(viewModel.user.gender.title)")
+                Text("\(user.age)세 \(user.gender.title)")
                     .foregroundColor(ColorManager.black200)
                     .font(.system(size: 18, weight: .bold))
             }
@@ -35,6 +36,8 @@ struct SendMessageView: View {
             Spacer()
             messageInputSection
         }
+        .customNavigationTitle(user.nickname)
+        .customNavBarItems(trailing: Image("more").hidden())
     }
     
     private var profileImage: some View {
@@ -82,9 +85,11 @@ struct SendMessageView: View {
                 Button {
                     Task {
                         isLoading = true
-                        await viewModel.sendNewMessage(text: text)
+                        await viewModel.setChats(text: text)
                         self.text = ""
                         hideKeyboard()
+                        onDimiss()
+                        NavigationUtil.popToRootView()
                         isLoading = false
                     }
                 } label: {
@@ -104,6 +109,6 @@ struct SendMessageView: View {
 
 struct SendMessageView_Previews: PreviewProvider {
     static var previews: some View {
-        SendMessageView(viewModel: SendMessageViewModel(user: MOCK_USER))
+        SendMessageView(viewModel: SendMessageViewModel(user: MOCK_USER), onDimiss: {})
     }
 }

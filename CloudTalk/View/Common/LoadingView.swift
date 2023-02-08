@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LoadingView: View {
     var body: some View {
-        Color.black.opacity(0.8).ignoresSafeArea()
+        Color.black.opacity(0.4).ignoresSafeArea()
             .overlay(
                 ProgressView().tint(.white)
             )

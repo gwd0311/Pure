@@ -17,9 +17,7 @@ struct Post: Identifiable, Decodable {
     let age: Int
     let region: Region
     let content: String
-    let likeCount: Int
     let likeUids: [String]
-    let commentCount: Int
     let profileImageUrl: String
     let postImageUrl: String
     let timestamp: Timestamp
@@ -32,9 +30,7 @@ let MOCK_POST = Post(
     age: 1,
     region: .busan,
     content: "앙 기모",
-    likeCount: 1,
     likeUids: ["RxuVbZB5zwakO64K5bbBoFFIuTn1"],
-    commentCount: 0,
     profileImageUrl: "",
     postImageUrl: "https://firebasestorage.googleapis.com:443/v0/b/fluttergram-faa5e.appspot.com/o/profile_images%2F0C12D688-F9F1-4EDE-B7B4-F3F506748685?alt=media&token=063127b5-713c-46d9-9d0d-86450e751569",
     timestamp: Timestamp(date: Date(timeInterval: TimeInterval(-200000), since: Date()))
