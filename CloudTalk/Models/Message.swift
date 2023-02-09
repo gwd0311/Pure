@@ -16,6 +16,10 @@ struct Message: Identifiable, Decodable {
     let isRead: Bool
     let text: String
     let timestamp: Timestamp
+    
+    var date: Date {
+        timestamp.dateValue()
+    }
 }
 
 let MOCK_MESSAGE = Message(

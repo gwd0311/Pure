@@ -10,8 +10,9 @@ import Kingfisher
 
 struct DetailView: View {
     
-    @ObservedObject var viewModel: DetailViewModel
     
+    @ObservedObject var viewModel: DetailViewModel
+
     @State private var showDialog = false
     @State private var showSendMessageView = false
     @State private var showConversationView = false
@@ -59,6 +60,8 @@ struct DetailView: View {
                 makeNavLinks(user: user)
                     .hidden()
             }
+            .padding(.bottom, 20)
+            .edgesIgnoringSafeArea(.bottom)
             .customNavBarItems(trailing: moreButton)
             .customNavigationTitle(user.nickname)
         } else {

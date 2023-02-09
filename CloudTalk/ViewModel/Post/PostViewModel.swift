@@ -22,10 +22,6 @@ class PostViewModel: ObservableObject {
     let defaults = UserDefaults.standard
     var query: Query = COLLECTION_POSTS
     
-    init() {
-        loadPosts()
-    }
-    
     func loadPosts() {
         setFilter()
         setQuery()
@@ -42,10 +38,11 @@ class PostViewModel: ObservableObject {
             return
         }
         
-        self.gender = gender != -1 ? Gender(rawValue: gender) : nil
-        self.region = region != -1 ? Region(rawValue: region) : nil
-        self.ageRange = lowerBound...upperBound
-        print(gender, region, ageRange)
+        DispatchQueue.main.async {
+            self.gender = gender != -1 ? Gender(rawValue: gender) : nil
+            self.region = region != -1 ? Region(rawValue: region) : nil
+            self.ageRange = lowerBound...upperBound
+        }
     }
     
     private func setQuery() {
@@ -121,7 +118,11 @@ class PostViewModel: ObservableObject {
         defaults.setValue(region?.rawValue ?? -1, forKey: DEFAULTS_POST_REGION)
         defaults.setValue(ageRange.lowerBound, forKey: DEFAULTS_POST_AGERANGE_LOWERBOUND)
         defaults.setValue(ageRange.upperBound, forKey: DEFAULTS_POST_AGERANGE_UPPERBOUND)
-        self.queriedPosts.removeAll()
-        self.posts.removeAll()
+        
+        DispatchQueue.main.async {
+            self.queriedPosts.removeAll()
+            self.posts.removeAll()
+        }
+        
     }
 }

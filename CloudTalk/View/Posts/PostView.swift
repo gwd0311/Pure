@@ -40,6 +40,9 @@ struct PostView: View {
                 .cornerRadius(36, corners: .topLeft)
             }
         }
+        .onWillAppear {
+            viewModel.loadPosts()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 titleLabel

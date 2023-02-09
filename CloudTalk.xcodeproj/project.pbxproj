@@ -81,6 +81,7 @@
 		B3D0A1C5298C0AA40004FC97 /* PostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D0A1C4298C0AA40004FC97 /* PostViewModel.swift */; };
 		B3D0A1C7298C0B120004FC97 /* PostCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D0A1C6298C0B120004FC97 /* PostCellViewModel.swift */; };
 		B3D0A1C9298CF8710004FC97 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D0A1C8298CF8710004FC97 /* PostDetailView.swift */; };
+		B3F0496029946034009141DD /* ChatList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0495F29946034009141DD /* ChatList.swift */; };
 		B3FD0D16297F676900529732 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0D15297F676900529732 /* LoadingView.swift */; };
 		B3FD0D382980C94100529732 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0D372980C94100529732 /* MainView.swift */; };
 		B3FD0D422980CBFD00529732 /* GmarketSansMedium.otf in Resources */ = {isa = PBXBuildFile; fileRef = B3FD0D3F2980CBFD00529732 /* GmarketSansMedium.otf */; };
@@ -164,6 +165,7 @@
 		B3D0A1C4298C0AA40004FC97 /* PostViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewModel.swift; sourceTree = "<group>"; };
 		B3D0A1C6298C0B120004FC97 /* PostCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCellViewModel.swift; sourceTree = "<group>"; };
 		B3D0A1C8298CF8710004FC97 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
+		B3F0495F29946034009141DD /* ChatList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatList.swift; sourceTree = "<group>"; };
 		B3FD0D15297F676900529732 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		B3FD0D372980C94100529732 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		B3FD0D3F2980CBFD00529732 /* GmarketSansMedium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = GmarketSansMedium.otf; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 				B34835F629913D4B001E9B4C /* ChatCell.swift */,
 				B3A33C4E2991EF7E002EF5A9 /* ConversationView.swift */,
 				B3A33C542992E25F002EF5A9 /* MessageView.swift */,
+				B3F0495F29946034009141DD /* ChatList.swift */,
 			);
 			path = Chats;
 			sourceTree = "<group>";
@@ -598,6 +601,7 @@
 				B363AA75297E97E500614337 /* RegionSheetView.swift in Sources */,
 				B34835FC29915B4A001E9B4C /* ChatViewModel.swift in Sources */,
 				B3D0A1402982B7DD0004FC97 /* FilterView.swift in Sources */,
+				B3F0496029946034009141DD /* ChatList.swift in Sources */,
 				B3A33C532992BD51002EF5A9 /* ProfileImageView.swift in Sources */,
 				B348360629917BB8001E9B4C /* Message.swift in Sources */,
 				B363AA73297E924700614337 /* AgeSheetView.swift in Sources */,

@@ -19,15 +19,15 @@ struct ChatView: View {
                 .cornerRadius(36, corners: .topLeft)
                 .edgesIgnoringSafeArea(.bottom)
                 .padding(.top, 5)
-            if viewModel.chats.isEmpty && !viewModel.isLoading{
-                VStack(spacing: 0) {
-                    Image("cloud_sad")
-                        .padding(.bottom, 18)
-                    Text("진행 중인 대화가 없습니다.")
-                        .foregroundColor(ColorManager.black500)
-                        .font(.system(size: 16, weight: .bold))
-                }
-            }
+//            if viewModel.chats.isEmpty {
+//                VStack(spacing: 0) {
+//                    Image("cloud_sad")
+//                        .padding(.bottom, 18)
+//                    Text("진행 중인 대화가 없습니다.")
+//                        .foregroundColor(ColorManager.black500)
+//                        .font(.system(size: 16, weight: .bold))
+//                }
+//            }
             VStack(spacing: 0) {
                 Spacer().frame(height: 5)
                 ScrollView(showsIndicators: false) {
@@ -36,6 +36,7 @@ struct ChatView: View {
                             ForEach(viewModel.chats) { chat in
                                 CustomNavigationLink {
                                     ConversationView(chat: chat)
+                                        .id(chat.id)
                                 } label: {
                                     ChatCell(chat: chat)
                                         .id(chat.id)
@@ -55,11 +56,8 @@ struct ChatView: View {
                 .cornerRadius(36, corners: .topLeft)
             }
         }
-        .overlay(
-            viewModel.isLoading ? LoadingView() : nil
-        )
         .onAppear {
-            print(viewModel.chats)
+            viewModel.fetchChats()
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

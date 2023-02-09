@@ -32,13 +32,7 @@ struct ConversationView: View {
                             makeProfiles(currentUser: currentUser, partnerUser: partnerUser)
                                 .padding(.top, 16)
                                 .padding(.bottom, 18)
-                            LazyVStack(spacing: 0) {
-                                ForEach(viewModel.messages) { message in
-                                    MessageView(message: message, partnerUser: partnerUser)
-                                        .id(message.id)
-                                        .padding(.bottom, 18)
-                                }
-                            }
+                            ChatList(messages: $viewModel.messages, partnerUser: partnerUser)
                             HStack { Spacer() }.id("Scroll")
                         }
                         .onReceive(viewModel.$scrollCount) { _ in
@@ -74,9 +68,7 @@ struct ConversationView: View {
                 .foregroundColor(ColorManager.black50)
                 .frame(height: 1)
             HStack(spacing: 0) {
-                MultilineTextField("새 메시지 입력", text: $text) {
-                    
-                }
+                MultilineTextField("새 메시지 입력", text: $text)
                 Spacer()
                 Button {
                     viewModel.sendMessage(text)

@@ -12,14 +12,8 @@ import FirebaseFirestoreSwift
 class ChatViewModel: ObservableObject {
     
     @Published var chats = [Chat]()
-    @Published var isLoading = false
-    
-    init() {
-        self.fetchChats()
-    }
     
     func fetchChats() {
-        isLoading = true
         guard let uid = AuthViewModel.shared.currentUser?.id else { return }
         
         COLLECTION_CHATS
@@ -33,11 +27,12 @@ class ChatViewModel: ObservableObject {
             }
             
             guard let chats = snapShot?.documents.compactMap({ try? $0.data(as: Chat.self) }) else { return }
+                        
+            DispatchQueue.main.async {
+                self.chats.removeAll()
+                self.chats = chats
+            }
             
-            print(chats)
-            
-            self.chats = chats
-            self.isLoading = false
         }
     }
     

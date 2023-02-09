@@ -56,10 +56,12 @@ extension Date {
         return dateFormatter.string(from: self)
     }
     
-    func formatYmdWithDay() -> String {
+    var ymdWithDay: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy.M.d EEEE"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         return dateFormatter.string(from: self)
     }
+    
+    // TODO: 두 날짜사이의 차이 계산
 }
