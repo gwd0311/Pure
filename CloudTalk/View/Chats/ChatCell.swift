@@ -10,26 +10,23 @@ import Kingfisher
 
 struct ChatCell: View {
     
-    @ObservedObject var viewModel: ChatCellViewModel
-    
-    private let chat: Chat
-    
-    init(chat: Chat) {
-        self.chat = chat
-        self.viewModel = ChatCellViewModel(chat: chat)
-    }
+    let chat: Chat
     
     var body: some View {
-        let chat = viewModel.chat
-        if let user = viewModel.user {
+        if let uid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first {
+            let profileImageUrl = chat.userProfileImages[uid] ?? ""
+            let gender = chat.userGenders[uid] ?? .woman
+            let nickName = chat.userNickNames[uid] ?? ""
+            let unReadMessageCount = chat.unReadMessageCount[uid] ?? 0
+            
             VStack(spacing: 0) {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        makeProfileImage(user: user)
+                        makeProfileImage(profileImageUrl: profileImageUrl, gender: gender)
                             .padding(.trailing, 16)
                         VStack(spacing: 6) {
                             HStack(spacing: 0) {
-                                Text(user.nickname)
+                                Text(nickName)
                                     .font(.system(size: 16, weight: .bold))
                                 Spacer()
                                 Text(chat.timestamp.dateValue().timeAgoDisplay())
@@ -43,8 +40,8 @@ struct ChatCell: View {
                                     .foregroundColor(ColorManager.black300)
                                     .frame(maxWidth: 232, alignment: .leading)
                                 Spacer()
-                                if chat.unReadMessageCount > 0 {
-                                    makeBadge(num: chat.unReadMessageCount)
+                                if unReadMessageCount > 0 {
+                                    makeBadge(num: unReadMessageCount)
                                 }
                             }
                         }
@@ -60,10 +57,7 @@ struct ChatCell: View {
                         .foregroundColor(ColorManager.black50)
                 }
             }
-            .background(.white)
-        }
-        
-        
+        } 
     }
     
     @ViewBuilder private func makeBadge(num: Int) -> some View {
@@ -77,40 +71,46 @@ struct ChatCell: View {
             )
     }
     
-    @ViewBuilder private func makeProfileImage(user: User) -> some View {
-        Group {
-            if !user.profileImageUrl.isEmpty {
-                Color.clear
-                    .aspectRatio(contentMode: .fill)
-                    .overlay(
-                        KFImage(URL(string: user.profileImageUrl))
-                            .resizable()
-                            .scaledToFill()
-                    )
-                    .frame(width: 62, height: 62)
-                    .clipShape(Circle())
-                    .contentShape(Circle())
-            } else if user.gender == .man {
-                Image("man")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 62, height: 62)
-                    .clipShape(Circle())
-                    .contentShape(Circle())
-            } else {
-                Image("woman")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 62, height: 62)
-                    .clipShape(Circle())
-                    .contentShape(Circle())
+    @ViewBuilder private func makeProfileImage(profileImageUrl: String, gender: Gender) -> some View {
+        CustomNavigationLink {
+            DetailView(viewModel: DetailViewModel(user: <#T##User#>))
+        } label: {
+            Group {
+                if !profileImageUrl.isEmpty {
+                    Color.clear
+                        .aspectRatio(contentMode: .fill)
+                        .overlay(
+                            KFImage(URL(string: profileImageUrl))
+                                .resizable()
+                                .scaledToFill()
+                        )
+                        .frame(width: 62, height: 62)
+                        .clipShape(Circle())
+                        .contentShape(Circle())
+                } else if gender == .man {
+                    Image("man")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 62, height: 62)
+                        .clipShape(Circle())
+                        .contentShape(Circle())
+                } else {
+                    Image("woman")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 62, height: 62)
+                        .clipShape(Circle())
+                        .contentShape(Circle())
+                }
             }
         }
+
+        
     }
 }
 
-struct ChatCell_Previews: PreviewProvider {
-    static var previews: some View {
-        ChatCell(chat: MOCK_CHAT)
-    }
-}
+//struct ChatCell_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ChatCell(chat: MOCK_CHAT)
+//    }
+//}

@@ -74,7 +74,7 @@ struct MainView: View {
     
     private var filterButton: some View {
         
-        NavigationLink {
+        CustomNavigationLink {
             FilterView(
                 gender: $viewModel.gender,
                 region: $viewModel.region,

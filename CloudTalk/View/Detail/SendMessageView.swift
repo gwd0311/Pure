@@ -9,7 +9,7 @@ import SwiftUI
 import Kingfisher
 
 struct SendMessageView: View {
-    @Environment(\.rootPresentationMode) private var rootPresentationMode: Binding<RootPresentationMode>
+    @Environment(\.dismiss) var dismiss
     @ObservedObject var viewModel: SendMessageViewModel
     let onDimiss: () -> Void
     @State private var text = ""
@@ -89,7 +89,7 @@ struct SendMessageView: View {
                         self.text = ""
                         hideKeyboard()
                         onDimiss()
-                        NavigationUtil.popToRootView()
+                        dismiss()
                         isLoading = false
                     }
                 } label: {

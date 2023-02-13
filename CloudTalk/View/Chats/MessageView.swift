@@ -10,78 +10,82 @@ import SwiftUI
 struct MessageView: View {
     
     let viewModel: MessageViewModel
-    let message: Message
-    let partnerUser: User
-    let previousDate: Date?
     
-    init(message: Message, partnerUser: User, previousDate: Date? = nil) {
-        self.message = message
-        self.partnerUser = partnerUser
-        self.viewModel = MessageViewModel(message, partnerUser: partnerUser)
-        self.previousDate = previousDate
+    init(
+        message: Message,
+        partnerUser: User,
+        previousDate: Date? = nil,
+        shouldShowTime: Bool
+    ) {
+        self.viewModel = MessageViewModel(
+            message: message,
+            partnerUser: partnerUser,
+            previousDate: previousDate,
+            shouldShowTime: shouldShowTime
+        )
     }
     
     var body: some View {
         
-        let date = message.date.ymdWithDay
+        let date = viewModel.message.date.ymdWithDay
         
         if viewModel.isFromCurrentUser {
             VStack {
-                if previousDate == nil || Calendar.current.compare(message.date, to: previousDate!, toGranularity: .day) != .orderedSame {
-                    Text(date)
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                }
+                makeDate(dateString: date)
                 HStack(spacing: 0) {
                     Spacer()
-                    VStack(spacing: 0) {
-                        Spacer()
-                        Text(viewModel.message.timestamp.dateValue().formatHm())
-                            .font(.system(size: 11, weight: .light))
-                            .foregroundColor(ColorManager.black250)
-                    }
-                    .padding(.trailing, 4)
-                    Text(viewModel.message.text)
-                        .font(.system(size: 16, weight: .light))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(ColorManager.blue)
-                        .cornerRadius(15, corners: [.topLeft, .topRight, .bottomLeft])
+                    makeTime()
+                        .padding(.trailing, 4)
+                        .padding(.bottom, 1)
+                    makeBubble(foregroundColor: .white, backgroundColor: ColorManager.blue, corners: [.topLeft, .topRight, .bottomLeft])
                 }
                 .padding(.horizontal, 18)
             }
         } else {
             VStack {
-                if previousDate == nil || Calendar.current.compare(message.date, to: previousDate!, toGranularity: .day) != .orderedSame {
-                    Text(date)
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                }
+                makeDate(dateString: date)
                 HStack(spacing: 0) {
                     VStack(spacing: 0) {
                         Spacer()
                         ProfileImageView(user: viewModel.partnerUser, type: .circle, width: 32, height: 32)
                             .padding(.trailing, 8)
                     }
-                    Text(viewModel.message.text)
-                        .font(.system(size: 16, weight: .light))
-                        .foregroundColor(ColorManager.black600)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(ColorManager.black50)
-                        .cornerRadius(15, corners: [.topLeft, .topRight, .bottomRight])
+                    makeBubble(foregroundColor: ColorManager.black600, backgroundColor: ColorManager.black50, corners: [.topLeft, .topRight, .bottomRight])
                         .padding(.trailing, 4)
-                    VStack(spacing: 0) {
-                        Spacer()
-                        Text(viewModel.message.timestamp.dateValue().formatHm())
-                            .font(.system(size: 11, weight: .light))
-                            .foregroundColor(ColorManager.black250)
-                            .padding(.bottom, 4)
-                    }
+                    makeTime()
+                        .padding(.bottom, 4)
                     Spacer()
                 }
                 .padding(.horizontal, 18)
+            }
+        }
+    }
+    
+    @ViewBuilder private func makeBubble(foregroundColor: Color, backgroundColor: Color, corners: UIRectCorner) -> some View {
+        Text(viewModel.message.text)
+            .font(.system(size: 16, weight: .light))
+            .foregroundColor(foregroundColor)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(backgroundColor)
+            .cornerRadius(15, corners: corners)
+    }
+    
+    @ViewBuilder private func makeDate(dateString: String) -> some View {
+        if viewModel.shouldShowDate {
+            Text(dateString)
+                .font(.system(size: 13, weight: .light))
+                .foregroundColor(ColorManager.black250)
+        }
+    }
+    
+    @ViewBuilder private func makeTime() -> some View {
+        if viewModel.shouldShowTime {
+            VStack(alignment: viewModel.isFromCurrentUser ? .trailing : .leading, spacing: 0) {
+                Spacer()
+                Text(viewModel.time)
+                    .font(.system(size: 11, weight: .light))
+                    .foregroundColor(ColorManager.black250)
             }
         }
     }

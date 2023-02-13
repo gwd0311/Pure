@@ -44,7 +44,7 @@ extension Date {
     
     func formatYmd() -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "YYYY.MM.dd HH:MM"
+        dateFormatter.dateFormat = "YYYY.MM.dd hh:mm"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         return dateFormatter.string(from: self)
     }

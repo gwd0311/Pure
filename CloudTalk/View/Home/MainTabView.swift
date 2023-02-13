@@ -39,9 +39,6 @@ struct MainTabView: View {
                     .background(ColorManager.tabBar)
                 }
             }
-            .onWillAppear {
-                // 하단 safeArea 하얀색으로 바꾸기
-            }
             .edgesIgnoringSafeArea(.bottom)
         }
         .tint(.black)

@@ -13,6 +13,7 @@ struct ConversationView: View {
     @State private var text = ""
     @State private var isLoading = false
     @State private var isEditing = false
+    @State private var showDialog = false
     @Environment(\.dismiss) var dismiss
     
     private let chat: Chat
@@ -41,6 +42,10 @@ struct ConversationView: View {
                     }
                     makeMessageInput(proxy: proxy)
                 }
+                .onAppear {
+                    self.viewModel.startListen()
+                }
+                .onDisappear(perform: viewModel.stopListen)
                 .resignKeyboard()
                 .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification), perform: { _ in
                     withAnimation {
@@ -49,6 +54,14 @@ struct ConversationView: View {
                 })
                 .customNavigationTitle(partnerUser.nickname)
                 .customNavBarItems(trailing: trailingItems)
+            }
+            .confirmationDialog("Select", isPresented: $showDialog) {
+                Button("차단하기") {
+                    
+                }
+                Button("신고하기") {
+                    
+                }
             }
         } else {
             VStack(spacing: 0) {
@@ -122,7 +135,7 @@ struct ConversationView: View {
     private var trailingItems: some View {
         HStack(spacing: 16) {
             Button {
-                
+                showDialog.toggle()
             } label: {
                 Image("more")
             }

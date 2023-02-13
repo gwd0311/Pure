@@ -14,7 +14,6 @@
 		B34835FF29916792001E9B4C /* SendMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B34835FE29916792001E9B4C /* SendMessageView.swift */; };
 		B348360229916A1C001E9B4C /* SendMessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B348360129916A1C001E9B4C /* SendMessageViewModel.swift */; };
 		B348360629917BB8001E9B4C /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B348360529917BB8001E9B4C /* Message.swift */; };
-		B348360829918780001E9B4C /* ChatCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B348360729918780001E9B4C /* ChatCellViewModel.swift */; };
 		B35001AA2977529000B691D7 /* CloudTalkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35001A92977529000B691D7 /* CloudTalkApp.swift */; };
 		B35001AC2977529000B691D7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B35001AB2977529000B691D7 /* ContentView.swift */; };
 		B35001AE2977529100B691D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B35001AD2977529100B691D7 /* Assets.xcassets */; };
@@ -82,6 +81,7 @@
 		B3D0A1C7298C0B120004FC97 /* PostCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D0A1C6298C0B120004FC97 /* PostCellViewModel.swift */; };
 		B3D0A1C9298CF8710004FC97 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D0A1C8298CF8710004FC97 /* PostDetailView.swift */; };
 		B3F0496029946034009141DD /* ChatList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F0495F29946034009141DD /* ChatList.swift */; };
+		B3F04962299569FA009141DD /* Array+.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F04961299569FA009141DD /* Array+.swift */; };
 		B3FD0D16297F676900529732 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0D15297F676900529732 /* LoadingView.swift */; };
 		B3FD0D382980C94100529732 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3FD0D372980C94100529732 /* MainView.swift */; };
 		B3FD0D422980CBFD00529732 /* GmarketSansMedium.otf in Resources */ = {isa = PBXBuildFile; fileRef = B3FD0D3F2980CBFD00529732 /* GmarketSansMedium.otf */; };
@@ -100,7 +100,6 @@
 		B34835FE29916792001E9B4C /* SendMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageView.swift; sourceTree = "<group>"; };
 		B348360129916A1C001E9B4C /* SendMessageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendMessageViewModel.swift; sourceTree = "<group>"; };
 		B348360529917BB8001E9B4C /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		B348360729918780001E9B4C /* ChatCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCellViewModel.swift; sourceTree = "<group>"; };
 		B35001A62977529000B691D7 /* CloudTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CloudTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35001A92977529000B691D7 /* CloudTalkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudTalkApp.swift; sourceTree = "<group>"; };
 		B35001AB2977529000B691D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -166,6 +165,7 @@
 		B3D0A1C6298C0B120004FC97 /* PostCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCellViewModel.swift; sourceTree = "<group>"; };
 		B3D0A1C8298CF8710004FC97 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
 		B3F0495F29946034009141DD /* ChatList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatList.swift; sourceTree = "<group>"; };
+		B3F04961299569FA009141DD /* Array+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+.swift"; sourceTree = "<group>"; };
 		B3FD0D15297F676900529732 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		B3FD0D372980C94100529732 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		B3FD0D3F2980CBFD00529732 /* GmarketSansMedium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = GmarketSansMedium.otf; sourceTree = "<group>"; };
@@ -208,7 +208,6 @@
 			isa = PBXGroup;
 			children = (
 				B34835FB29915B4A001E9B4C /* ChatViewModel.swift */,
-				B348360729918780001E9B4C /* ChatCellViewModel.swift */,
 				B3A33C502992AD93002EF5A9 /* ConversationViewModel.swift */,
 				B3A33C562992E34E002EF5A9 /* MessageViewModel.swift */,
 			);
@@ -368,6 +367,7 @@
 			isa = PBXGroup;
 			children = (
 				B363AA54297A021C00614337 /* View+.swift */,
+				B3F04961299569FA009141DD /* Array+.swift */,
 				B35001D0297769F700B691D7 /* Font+.swift */,
 				B3FD0D512981742100529732 /* Date+.swift */,
 				B3A33C4A2991CB8D002EF5A9 /* RootPresentationMode+.swift */,
@@ -609,6 +609,7 @@
 				B3A33C4D2991DBEA002EF5A9 /* NavigationUtil.swift in Sources */,
 				B3A33C5B2993F94C002EF5A9 /* MultilineTextField.swift in Sources */,
 				B34835F929913E25001E9B4C /* Chat.swift in Sources */,
+				B3F04962299569FA009141DD /* Array+.swift in Sources */,
 				B350022B2978D1D100B691D7 /* MainButtonStyle.swift in Sources */,
 				B34835FF29916792001E9B4C /* SendMessageView.swift in Sources */,
 				B3D0A1C1298B07020004FC97 /* PostCell.swift in Sources */,
@@ -624,7 +625,6 @@
 				B35001AA2977529000B691D7 /* CloudTalkApp.swift in Sources */,
 				B39B2D71298D06D70069DA2E /* Comment.swift in Sources */,
 				B3A33C492991C1FD002EF5A9 /* DetailViewModel.swift in Sources */,
-				B348360829918780001E9B4C /* ChatCellViewModel.swift in Sources */,
 				B35002232978C3A800B691D7 /* Constants.swift in Sources */,
 				B35002212978C21500B691D7 /* PhoneAuthView.swift in Sources */,
 				B35001C32977577E00B691D7 /* SplashView.swift in Sources */,

@@ -11,57 +11,86 @@ import FirebaseFirestoreSwift
 
 class ConversationViewModel: ObservableObject {
     
-    let chat: Chat
+    var chat: Chat
     
     @Published var partnerUser: User?
     @Published var currentUser: User? = AuthViewModel.shared.currentUser
     @Published var messages = [Message]()
     @Published var scrollCount = 0
+    var shouldListen = true
     
     init(chat: Chat) {
         self.chat = chat
-        self.fetchMessages()
         self.fetchPartenerUser()
     }
     
-    func fetchMessages() {
-        guard let cid = chat.id else { return }
-        COLLECTION_CHATS.document(cid).collection("messages")
-            .order(by: KEY_TIMESTAMP, descending: false)
-            .addSnapshotListener { snapShot, err in
-            
-            if let err = err {
-                print(err.localizedDescription)
-            }
-            
-            guard let changes = snapShot?.documentChanges.filter({ $0.type == .added }) else { return }
+    private var listener: ListenerRegistration?
+        
+    func startListen() {
+        if shouldListen {
+            guard let cid = chat.id else { return }
+            COLLECTION_CHATS.document(cid).collection("messages")
+                .order(by: KEY_TIMESTAMP, descending: false)
+                .addSnapshotListener { snapShot, err in
                 
-            let messages = changes.compactMap({ try? $0.document.data(as: Message.self) })
-            
-            self.messages.append(contentsOf: messages)
+                if let err = err {
+                    print(err.localizedDescription)
+                }
+                    
+                guard let changes = snapShot?.documentChanges.filter({ $0.type == .added }) else { return }
+                    
+                let messages = changes.compactMap({ try? $0.document.data(as: Message.self) })
+                
+                DispatchQueue.main.async {
+                    self.messages.append(contentsOf: messages)
+                    self.scrollCount += 1
+                }
+                
+            }
+            shouldListen = false
+        }
+    }
+    
+    func stopListen() {
+        listener?.remove()
+    }
+    
+    func initializeCount(onEnd: @escaping () -> Void) {
+        guard let cid = chat.id else { return }
+        print("실행되었음")
+        guard let uid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first else { return }
+        COLLECTION_CHATS.document(cid).updateData([
+            KEY_UNREADMESSAGECOUNT: [uid: 0]
+        ]) { _ in
+            onEnd()
         }
     }
     
     func sendMessage(_ messageText: String) {
         guard let cid = chat.id else { return }
-
+        guard let currentUserId = currentUser?.id else { return }
+        guard let partnerUserId = partnerUser?.id else { return }
+        
         let messageData: [String: Any] = [
-            KEY_FROMID: currentUser?.id ?? "",
-            KEY_TOID: partnerUser?.id ?? "",
-            KEY_ISREAD: false,
+            KEY_CID: cid,
+            KEY_FROMID: currentUserId,
+            KEY_TOID: partnerUserId,
             KEY_TEXT: messageText,
             KEY_TIMESTAMP: Timestamp(date: Date())
         ]
         
-        COLLECTION_CHATS.document(cid).collection("messages").document().setData(messageData) { _ in
-            DispatchQueue.main.async {
-                self.scrollCount += 1
-            }
-        }
+        var unReadMessageCount = chat.unReadMessageCount
+        unReadMessageCount[currentUserId] = (unReadMessageCount[currentUserId] ?? 0) + 1
+        unReadMessageCount[partnerUserId] = (unReadMessageCount[partnerUserId] ?? 0)
+
+        COLLECTION_CHATS.document(cid).collection("messages").document().setData(messageData)
         COLLECTION_CHATS.document(cid).updateData([
             KEY_LASTMESSAGE: messageText,
-            KEY_TIMESTAMP: Timestamp(date: Date())
-        ])
+            KEY_TIMESTAMP: Timestamp(date: Date()),
+            KEY_UNREADMESSAGECOUNT: unReadMessageCount
+        ]) { _ in
+            self.chat.unReadMessageCount = unReadMessageCount
+        }
     }
     
     func fetchPartenerUser() {

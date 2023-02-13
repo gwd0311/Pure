@@ -10,6 +10,9 @@ import SwiftUI
 struct ChatView: View {
     
     @ObservedObject var viewModel = ChatViewModel()
+    @State private var isEmpty = false
+    @State private var didAppear = false
+    @State private var appearCount = 0
     
     var body: some View {
         ZStack {
@@ -19,15 +22,15 @@ struct ChatView: View {
                 .cornerRadius(36, corners: .topLeft)
                 .edgesIgnoringSafeArea(.bottom)
                 .padding(.top, 5)
-//            if viewModel.chats.isEmpty {
-//                VStack(spacing: 0) {
-//                    Image("cloud_sad")
-//                        .padding(.bottom, 18)
-//                    Text("진행 중인 대화가 없습니다.")
-//                        .foregroundColor(ColorManager.black500)
-//                        .font(.system(size: 16, weight: .bold))
-//                }
-//            }
+            if isEmpty {
+                VStack(spacing: 0) {
+                    Image("cloud_sad")
+                        .padding(.bottom, 18)
+                    Text("진행 중인 대화가 없습니다.")
+                        .foregroundColor(ColorManager.black500)
+                        .font(.system(size: 16, weight: .bold))
+                }
+            }
             VStack(spacing: 0) {
                 Spacer().frame(height: 5)
                 ScrollView(showsIndicators: false) {
@@ -46,18 +49,29 @@ struct ChatView: View {
                                             }
                                         }
                                 }
+                                .simultaneousGesture(TapGesture().onEnded {
+                                    print("Tapped")
+                                })
                             }
                         }
                     }
                 }
-                .refreshable {
-                    viewModel.fetchChats()
-                }
                 .cornerRadius(36, corners: .topLeft)
             }
         }
+        .task {
+            try? await Task.sleep(nanoseconds: 0_500_000_000)
+            if viewModel.chats.isEmpty {
+                isEmpty = true
+            } else {
+                isEmpty = false
+            }
+        }
         .onAppear {
-            viewModel.fetchChats()
+            self.viewModel.startListen()
+        }
+        .onDisappear {
+            self.viewModel.stopListen()
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

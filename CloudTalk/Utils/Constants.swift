@@ -29,13 +29,16 @@ let KEY_COMMENT_COUNT = "commentCount"
 // Comment
 let KEY_COMMENT = "comment"
 // Chat
+let KEY_USER_NICKNAMES = "userNickNames"
+let KEY_USER_PROFILE_IMAGES = "userProfileImages"
+let KEY_USER_GENDERS = "userGenders"
 let KEY_UIDS = "uids"
 let KEY_LASTMESSAGE = "lastMessage"
 let KEY_UNREADMESSAGECOUNT = "unReadMessageCount"
 // Message
+let KEY_CID = "cid"
 let KEY_FROMID = "fromId"
 let KEY_TOID = "toId"
-let KEY_ISREAD = "isRead"
 let KEY_TEXT = "text"
 
 // UserDefaults

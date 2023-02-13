@@ -20,11 +20,17 @@ class SendMessageViewModel: ObservableObject {
     func setChats(text: String) async {
         guard let fromId = AuthViewModel.shared.currentUser?.id else { return }
         guard let toId = user.id else { return }
-
+        
+        guard let currentUser = AuthViewModel.shared.currentUser else { return }
+        let partnerUser = user
+        
         let data: [String: Any] = [
             KEY_UIDS: [fromId, toId],
+            KEY_USER_NICKNAMES: [fromId: currentUser.nickname, toId: partnerUser.nickname],
+            KEY_USER_PROFILE_IMAGES: [fromId: currentUser.profileImageUrl, toId: partnerUser.profileImageUrl],
+            KEY_USER_GENDERS: [fromId: currentUser.gender.rawValue, toId: partnerUser.gender.rawValue],
             KEY_LASTMESSAGE: text,
-            KEY_UNREADMESSAGECOUNT: 0,
+            KEY_UNREADMESSAGECOUNT: [fromId: 1, toId: 0],
             KEY_TIMESTAMP: Timestamp(date: Date())
         ]
         
@@ -39,9 +45,9 @@ class SendMessageViewModel: ObservableObject {
         guard let toId = user.id else { return }
         
         let data: [String: Any] = [
+            KEY_CID: docId,
             KEY_FROMID: fromId,
             KEY_TOID: toId,
-            KEY_ISREAD: false,
             KEY_TEXT: text,
             KEY_TIMESTAMP: Timestamp(date: Date())
         ]
