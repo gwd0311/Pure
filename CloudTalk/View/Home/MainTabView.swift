@@ -13,35 +13,32 @@ struct MainTabView: View {
     @State private var tabIndex: TabIndex = .main
     
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottom) {
-                Color.white.edgesIgnoringSafeArea(.all)
-                selectedView
-                Group {
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .foregroundColor(.red)
-                            .frame(height: 58)
-                            .shadow(color: ColorManager.shadow.opacity(0.08), radius: 4, x: 0, y: 1)
-                    }
-                    .padding(.bottom, 20)
-                    HStack(spacing: 0) {
-                        mainButton
-                        postButton
-                        chatButton
-                        likeButton
-                        settingsButton
-                    }
-                    .frame(height: 58)
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 20)
-                    .background(ColorManager.tabBar)
+        ZStack(alignment: .bottom) {
+            Color.white.edgesIgnoringSafeArea(.all)
+            selectedView
+            Group {
+                VStack {
+                    Spacer()
+                    Rectangle()
+                        .foregroundColor(.red)
+                        .frame(height: 58)
+                        .shadow(color: ColorManager.shadow.opacity(0.08), radius: 4, x: 0, y: 1)
                 }
+                .padding(.bottom, 20)
+                HStack(spacing: 0) {
+                    mainButton
+                    postButton
+                    chatButton
+                    likeButton
+                    settingsButton
+                }
+                .frame(height: 58)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 20)
+                .background(ColorManager.tabBar)
             }
-            .edgesIgnoringSafeArea(.bottom)
         }
-        .tint(.black)
+        .edgesIgnoringSafeArea(.bottom)
     }
     
     private var selectedView: some View {
@@ -54,7 +51,7 @@ struct MainTabView: View {
             case .chat:
                 ChatView(viewModel: ChatViewModel())
             case .like:
-                Text("likeView")
+                LikeView()
             case .settings:
                 SettingsView()
             }

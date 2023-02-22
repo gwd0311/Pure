@@ -12,6 +12,7 @@ import CryptoKit
 import AuthenticationServices
 import FirebaseFirestore
 import FirebaseFirestoreSwift
+import FirebaseStorage
 
 class AuthViewModel: NSObject, ObservableObject {
     
@@ -34,6 +35,106 @@ class AuthViewModel: NSObject, ObservableObject {
         userSession = Auth.auth().currentUser
         
         fetchUser()
+    }
+    
+    var blackUids: [String] {
+        self.currentUser?.blackUids ?? []
+    }
+    
+    func unBlock(uid: String, onUnBlock: @escaping () -> Void) {
+        /// firestore의 arrayRemove는 timestamp가 저장될 경우, 같은 문자열이라도 다르게 저장할 수 있다.
+        /// 그렇기 때문에 getDocument로 지울 항목을 가져와서 지워야한다.
+        
+        let ref = COLLECTION_USERS.document(currentUser?.id ?? "")
+        
+        ref.updateData([
+            KEY_BLACK_UIDS: FieldValue.arrayRemove([uid])
+        ]) { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                onUnBlock()
+            }
+        }
+    }
+    
+    func updateCurrentUser(
+        image: UIImage?,
+        nickname: String,
+        gender: Gender,
+        age: Int,
+        region: Region,
+        introduction: String,
+        onUpdate: @escaping () -> Void
+    ) {
+        guard let uid = self.currentUser?.id else { return }
+        
+        if let image = image {
+            if let profileUrl = currentUser?.profileImageUrl {
+                if !profileUrl.isEmpty {
+                    let ref = Storage.storage().reference(forURL: profileUrl)
+                    ref.delete { err in
+                        if let err = err {
+                            print(err.localizedDescription)
+                        }
+                    }
+                }
+            }
+
+            ImageUploader.uploadImage(image: image) { imgUrl in
+                let data: [String: Any] = [
+                    KEY_PROFILE_IMAGE_URL: imgUrl,
+                    KEY_NICKNAME: nickname,
+                    KEY_GENDER: gender.rawValue,
+                    KEY_AGE: age,
+                    KEY_REGION: region.rawValue,
+                    KEY_INTRODUCTION: introduction
+                ]
+                COLLECTION_USERS.document(uid).updateData(data) { err in
+                    if let err = err {
+                        print(err.localizedDescription)
+                        return
+                    }
+                    onUpdate()
+                }
+            }
+            
+        } else {
+            let data: [String: Any] = [
+                KEY_NICKNAME: nickname,
+                KEY_GENDER: gender,
+                KEY_AGE: age,
+                KEY_REGION: region,
+                KEY_INTRODUCTION: introduction
+            ]
+            COLLECTION_USERS.document(uid).updateData(data) { err in
+                if let err = err {
+                    print(err.localizedDescription)
+                    return
+                }
+                onUpdate()
+            }
+        }
+    }
+    
+    private func updateData() {
+        
+    }
+    
+    func blackUser(uid: String, completion: @escaping () -> Void) {
+        guard let currentUid = currentUser?.id else { return }
+        COLLECTION_USERS.document(currentUid).updateData([
+            KEY_BLACK_UIDS: FieldValue.arrayUnion([uid])
+        ]) { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            self.fetchUser()
+            completion()
+        }
     }
     
     func sendCode() {

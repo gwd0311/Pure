@@ -15,14 +15,16 @@ enum ProfileImageType {
 
 struct ProfileImageView: View {
     
-    let user: User
+    let profileImageUrl: String
+    let gender: Gender
     let type: ProfileImageType
     var width: CGFloat? = 46
     var height: CGFloat? = 46
     var radius: CGFloat? = 12
     
-    init(user: User, type: ProfileImageType, width: CGFloat? = 46, height: CGFloat? = 46, radius: CGFloat? = 12) {
-        self.user = user
+    init(profileImageUrl: String, gender: Gender, type: ProfileImageType, width: CGFloat? = 46, height: CGFloat? = 46, radius: CGFloat? = 12) {
+        self.profileImageUrl = profileImageUrl
+        self.gender = gender
         self.type = type
         self.width = width
         self.height = height
@@ -34,12 +36,12 @@ struct ProfileImageView: View {
            let height = height,
            let radius = radius {
             VStack {
-                if !user.profileImageUrl.isEmpty {
+                if !profileImageUrl.isEmpty {
                     if type == .circle {
                         Color.clear
                             .aspectRatio(contentMode: .fill)
                             .overlay(
-                                KFImage(URL(string: user.profileImageUrl))
+                                KFImage(URL(string: profileImageUrl))
                                     .resizable()
                                     .scaledToFill()
                             )
@@ -49,7 +51,7 @@ struct ProfileImageView: View {
                         Color.clear
                             .aspectRatio(contentMode: .fill)
                             .overlay(
-                                KFImage(URL(string: user.profileImageUrl))
+                                KFImage(URL(string: profileImageUrl))
                                     .resizable()
                                     .scaledToFill()
                             )
@@ -57,7 +59,7 @@ struct ProfileImageView: View {
                             .modifier(RectModifier(radius: radius ))
                     }
                     
-                } else if user.gender == .man {
+                } else if gender == .man {
                     if type == .circle {
                         Image("man")
                             .resizable()
@@ -93,7 +95,7 @@ struct ProfileImageView: View {
 
 struct ProfileImageView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileImageView(user: MOCK_USER, type: .roundRect)
+        ProfileImageView(profileImageUrl: "", gender: .woman, type: .roundRect)
     }
 }
 

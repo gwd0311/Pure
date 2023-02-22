@@ -13,28 +13,71 @@ class ConversationViewModel: ObservableObject {
     
     var chat: Chat
     
-    @Published var partnerUser: User?
-    @Published var currentUser: User? = AuthViewModel.shared.currentUser
     @Published var messages = [Message]()
-    @Published var scrollCount = 0
     var shouldListen = true
+    var lastMessageTime: Date?
+    
+    private var listener: ListenerRegistration?
     
     init(chat: Chat) {
         self.chat = chat
-        self.fetchPartenerUser()
     }
     
-    private var listener: ListenerRegistration?
+    var currentUid: String {
+        AuthViewModel.shared.currentUser?.id ?? ""
+    }
+    
+    var partnerUid: String {
+        if let uid = chat.uids.filter({ $0 != currentUid }).first {
+            return uid
+        } else {
+            return ""
+        }
+    }
+    
+    var currentNickName: String {
+        chat.userNickNames[currentUid] ?? "비활성화된닉네임"
+    }
+    
+    var partnerNickName: String {
+        chat.userNickNames[partnerUid] ?? "비활성화된닉네임"
+    }
+    
+    var currentGender: Gender {
+        chat.userGenders[currentUid] ?? .man
+    }
+    
+    var partnerGender: Gender {
+        chat.userGenders[partnerUid] ?? .man
+    }
+    
+    var currentAge: Int {
+        chat.userAges[currentUid] ?? 20
+    }
+    
+    var partnerAge: Int {
+        chat.userAges[partnerUid] ?? 20
+    }
+    
+    var currentProfileImageUrl: String {
+        chat.userProfileImages[currentUid] ?? ""
+    }
+    
+    var partnerProfileImageUrl: String {
+        chat.userProfileImages[partnerUid] ?? ""
+    }
         
     func startListen() {
         if shouldListen {
             guard let cid = chat.id else { return }
             COLLECTION_CHATS.document(cid).collection("messages")
                 .order(by: KEY_TIMESTAMP, descending: false)
+                .limit(toLast: 50)
                 .addSnapshotListener { snapShot, err in
                 
                 if let err = err {
                     print(err.localizedDescription)
+                    return
                 }
                     
                 guard let changes = snapShot?.documentChanges.filter({ $0.type == .added }) else { return }
@@ -43,7 +86,6 @@ class ConversationViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.messages.append(contentsOf: messages)
-                    self.scrollCount += 1
                 }
                 
             }
@@ -68,54 +110,65 @@ class ConversationViewModel: ObservableObject {
     
     func sendMessage(_ messageText: String) {
         guard let cid = chat.id else { return }
-        guard let currentUserId = currentUser?.id else { return }
-        guard let partnerUserId = partnerUser?.id else { return }
         
         let messageData: [String: Any] = [
             KEY_CID: cid,
-            KEY_FROMID: currentUserId,
-            KEY_TOID: partnerUserId,
+            KEY_FROMID: currentUid,
+            KEY_TOID: partnerUid,
             KEY_TEXT: messageText,
             KEY_TIMESTAMP: Timestamp(date: Date())
         ]
+        
+        COLLECTION_CHATS.document(cid).collection("messages").document().setData(messageData)
+
+        COLLECTION_CHATS.document(cid).getDocument { snapshot, err in
+            if let err = err {
+                print(err.localizedDescription)
+            }
+            
+            guard let chat = try? snapshot?.data(as: Chat.self) else { return }
+            
+            self.setMessageData(
+                chat: chat,
+                currentUserId: self.currentUid,
+                partnerUserId: self.partnerUid,
+                messageText: messageText
+            )
+        }
+    }
+    
+    private func setMessageData(chat: Chat, currentUserId: String, partnerUserId: String, messageText: String) {
+        guard let cid = chat.id else { return }
         
         var unReadMessageCount = chat.unReadMessageCount
         unReadMessageCount[currentUserId] = (unReadMessageCount[currentUserId] ?? 0) + 1
         unReadMessageCount[partnerUserId] = (unReadMessageCount[partnerUserId] ?? 0)
 
-        COLLECTION_CHATS.document(cid).collection("messages").document().setData(messageData)
         COLLECTION_CHATS.document(cid).updateData([
             KEY_LASTMESSAGE: messageText,
             KEY_TIMESTAMP: Timestamp(date: Date()),
             KEY_UNREADMESSAGECOUNT: unReadMessageCount
         ]) { _ in
-            self.chat.unReadMessageCount = unReadMessageCount
+            DispatchQueue.main.async {
+                self.chat.unReadMessageCount = unReadMessageCount
+            }
         }
     }
     
-    func fetchPartenerUser() {
+    func read() {
         guard let cid = chat.id else { return }
+        guard let uid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first else { return }
         
-        COLLECTION_CHATS.document(cid).getDocument { snapShot, err in
-            
-            if let err = err {
-                print(err.localizedDescription)
-            }
-            
-            guard let chat = try? snapShot?.data(as: Chat.self) else { return }
-            
-            guard let partnerUid = chat.uids.filter({ $0 != self.currentUser?.id }).first else { return }
-            
-            COLLECTION_USERS.document(partnerUid).getDocument { snapShot, err in
-                
-                if let err = err {
-                    print(err.localizedDescription)
-                }
-                
-                guard let partnerUser = try? snapShot?.data(as: User.self) else { return }
-                
-                self.partnerUser = partnerUser
+        var unReadMessageCount = chat.unReadMessageCount
+        unReadMessageCount[uid] = 0
+        
+        COLLECTION_CHATS.document(cid).updateData([
+            KEY_UNREADMESSAGECOUNT: unReadMessageCount
+        ]) { _ in
+            DispatchQueue.main.async {
+                self.chat.unReadMessageCount[uid] = 0
             }
         }
     }
+    
 }

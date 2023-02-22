@@ -82,7 +82,9 @@ class RegistrationViewModel: ObservableObject {
             KEY_REGION: region.rawValue,
             KEY_INTRODUCTION: introduction,
             KEY_PROFILE_IMAGE_URL: "",
-            KEY_TIMESTAMP: Timestamp(date: Date())
+            KEY_TIMESTAMP: Timestamp(date: Date()),
+            KEY_BLACK_UIDS: [],
+            KEY_POINT: 100
         ]
         
         COLLECTION_USERS.document(uid).setData(data) { err in

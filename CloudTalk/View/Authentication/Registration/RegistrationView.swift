@@ -30,7 +30,7 @@ struct RegistrationView: View {
                     }
                 }
                 .fullScreenCover(isPresented: $showImagePicker) {
-                    ImagePicker(image: $viewModel.image, isLoading: $isLoading)
+                    ImagePicker(image: $viewModel.image)
                 }
                 .halfSheet(showSheet: $showSheet) {
                     switch currentProfileInfo {

@@ -10,13 +10,15 @@ import Foundation
 class MessageViewModel: ObservableObject {
     
     let message: Message
-    let partnerUser: User
+    let profileImageUrl: String
+    let gender: Gender
     let previousDate: Date?
     let shouldShowTime: Bool
     
-    init(message: Message, partnerUser: User, previousDate: Date? = nil, shouldShowTime: Bool) {
+    init(message: Message, profileImageUrl: String, gender: Gender, previousDate: Date? = nil, shouldShowTime: Bool) {
         self.message = message
-        self.partnerUser = partnerUser
+        self.profileImageUrl = profileImageUrl
+        self.gender = gender
         self.previousDate = previousDate
         self.shouldShowTime = shouldShowTime
     }

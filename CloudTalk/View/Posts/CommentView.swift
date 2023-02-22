@@ -11,13 +11,27 @@ import Kingfisher
 struct CommentView: View {
     
     let comment: Comment
+    @ObservedObject var viewModel: CommentViewModel
+    
+    init(comment: Comment) {
+        self.comment = comment
+        self.viewModel = CommentViewModel(comment: comment)
+    }
     
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 0) {
-                    profileImage
-                        .padding(.trailing, 10)
+                    CustomNavigationLink {
+                        if let user = viewModel.user {
+                            DetailView(viewModel: DetailViewModel(user: user))
+                        } else {
+                            Text("데이터를 불러오지 못했습니다.")
+                        }
+                    } label: {
+                        profileImage
+                            .padding(.trailing, 10)
+                    }
                     VStack(alignment: .leading, spacing: 2) {
                         profileNickname
                         Text(comment.comment)

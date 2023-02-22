@@ -10,6 +10,8 @@ import Firebase
 let COLLECTION_USERS = Firestore.firestore().collection("users")
 let COLLECTION_POSTS = Firestore.firestore().collection("posts")
 let COLLECTION_CHATS = Firestore.firestore().collection("chats")
+let COLLECTION_LIKECARDS = Firestore.firestore().collection("likeCards")
+let COLLECTION_REPORTS = Firestore.firestore().collection("reports")
 
 // User
 let KEY_NICKNAME = "nickname"
@@ -18,6 +20,8 @@ let KEY_AGE = "age"
 let KEY_REGION = "region"
 let KEY_INTRODUCTION = "introduction"
 let KEY_PROFILE_IMAGE_URL = "profileImageUrl"
+let KEY_BLACK_UIDS = "blackUids"
+let KEY_POINT = "point"
 let KEY_TIMESTAMP = "timestamp"
 // Post
 let KEY_UID = "uid"
@@ -30,6 +34,7 @@ let KEY_COMMENT_COUNT = "commentCount"
 let KEY_COMMENT = "comment"
 // Chat
 let KEY_USER_NICKNAMES = "userNickNames"
+let KEY_USER_AGES = "userAges"
 let KEY_USER_PROFILE_IMAGES = "userProfileImages"
 let KEY_USER_GENDERS = "userGenders"
 let KEY_UIDS = "uids"
@@ -40,6 +45,11 @@ let KEY_CID = "cid"
 let KEY_FROMID = "fromId"
 let KEY_TOID = "toId"
 let KEY_TEXT = "text"
+// LikeCard
+let KEY_FROM_USER_DATA = "fromUserData"
+let KEY_TO_USER_DATA = "toUserData"
+// Report
+let KEY_REPORT_TYPE = "reportType"
 
 // UserDefaults
 /// main scene

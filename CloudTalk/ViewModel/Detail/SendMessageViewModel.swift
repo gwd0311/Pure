@@ -27,6 +27,7 @@ class SendMessageViewModel: ObservableObject {
         let data: [String: Any] = [
             KEY_UIDS: [fromId, toId],
             KEY_USER_NICKNAMES: [fromId: currentUser.nickname, toId: partnerUser.nickname],
+            KEY_USER_AGES: [fromId: currentUser.age, toId: partnerUser.age],
             KEY_USER_PROFILE_IMAGES: [fromId: currentUser.profileImageUrl, toId: partnerUser.profileImageUrl],
             KEY_USER_GENDERS: [fromId: currentUser.gender.rawValue, toId: partnerUser.gender.rawValue],
             KEY_LASTMESSAGE: text,

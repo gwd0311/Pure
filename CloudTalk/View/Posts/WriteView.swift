@@ -32,7 +32,7 @@ struct WriteView: View {
         .padding(.vertical, 16)
         .padding(.horizontal, 18)
         .fullScreenCover(isPresented: $showImagePicker, content: {
-            ImagePicker(image: $image, isLoading: $isLoading)
+            ImagePicker(image: $image)
         })
         .overlay(
             isLoading ? LoadingView() : nil

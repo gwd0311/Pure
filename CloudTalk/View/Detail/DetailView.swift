@@ -16,6 +16,8 @@ struct DetailView: View {
     @State private var showDialog = false
     @State private var showSendMessageView = false
     @State private var showConversationView = false
+    @State private var showReportView = false
+    @State private var showBlackView = false
     
     var body: some View {
         let user = viewModel.user
@@ -33,13 +35,13 @@ struct DetailView: View {
                     .confirmationDialog("Select", isPresented: $showDialog, actions: {
                         Button {
                             // 차단하기 기능 구현
-                            
+                            showBlackView.toggle()
                         } label: {
                             Text("차단하기")
                         }
                         Button {
                             // 신고하기 기능 구현
-                            
+                            showReportView.toggle()
                         } label: {
                             Text("신고하기")
                         }
@@ -60,6 +62,12 @@ struct DetailView: View {
                 makeNavLinks(user: user)
                     .hidden()
             }
+            .overlay(
+                self.showReportView ? ReportView(user: user, showReportView: $showReportView) : nil
+            )
+            .overlay(
+                self.showBlackView ? BlackView(uid: user.id ?? "", showBlackView: $showBlackView) : nil
+            )
             .padding(.bottom, 20)
             .edgesIgnoringSafeArea(.bottom)
             .customNavBarItems(trailing: moreButton)
@@ -181,10 +189,10 @@ struct DetailView: View {
         HStack {
             Button {
                 // 좋아요 기능 구현
-                
+                viewModel.pressLikeButton()
             } label: {
                 VStack(spacing: 0) {
-                    Image("heart")
+                    Image(viewModel.isHeartPressed ? "heart_fill" : "heart")
                     Text("좋아요")
                         .foregroundColor(ColorManager.redLight)
                         .font(.system(size: 11, weight: .semibold))
@@ -218,8 +226,9 @@ struct DetailView: View {
     // MARK: - 우측 상단 더보기 버튼
     private var moreButton: some View {
         Button {
-            // 신고하기 차단하기 기능 fabula dialog로 구현해보기
             showDialog.toggle()
+            self.showBlackView = false
+            self.showReportView = false
         } label: {
             Image("more")
         }

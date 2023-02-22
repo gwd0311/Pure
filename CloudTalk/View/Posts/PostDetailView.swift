@@ -22,8 +22,14 @@ struct PostDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 0) {
-                            profileImage
-                                .padding(.trailing, 10)
+                            CustomNavigationLink {
+                                if let user = viewModel.user {
+                                    DetailView(viewModel: DetailViewModel(user: user))
+                                }
+                            } label: {
+                                profileImage
+                                    .padding(.trailing, 10)
+                            }
                             VStack(alignment: .leading, spacing: 2) {
                                 profileNickname
                                 profileDetailInfo

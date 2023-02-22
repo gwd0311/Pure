@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Firebase
 import FirebaseFirestoreSwift
 
 class DetailViewModel: ObservableObject {
@@ -13,16 +14,66 @@ class DetailViewModel: ObservableObject {
     let user: User
     @Published var isHeartPressed = false
     @Published var isChatting: Bool?
+    @Published var isLoading = false
     @Published var chat: Chat?
     
     init(user: User) {
         self.user = user
+        fetchHeartPressedInfo()
     }
     
     private func fetchHeartPressedInfo() {
-        // TODO: - 하트 좋아요 눌린 상태인지 아닌지 체크해서 가져와야함
-        // isHeartPressed = true
-        
+        guard let uid = AuthViewModel.shared.currentUser?.id else { return }
+        COLLECTION_LIKECARDS
+            .whereField(KEY_FROMID, isEqualTo: uid)
+            .whereField(KEY_TOID, isEqualTo: user.id ?? "")
+            .getDocuments { snapshot, err in
+                if let err = err {
+                    print(err.localizedDescription)
+                    return
+                }
+                
+                guard let likeCards = snapshot?.documents.compactMap({ try? $0.data(as: LikeCard.self) }) else { return }
+                
+                if !likeCards.isEmpty {
+                    self.isHeartPressed = true
+                }
+            }
+    }
+    
+    func pressLikeButton() {
+        guard let uid = AuthViewModel.shared.currentUser?.id else { return }
+        if isHeartPressed {
+            // TODO: Heart가 눌려있었다면 LikeCard를 제거하기 (성공 시 isHeartPressed = false)
+            COLLECTION_LIKECARDS
+                .whereField(KEY_FROMID, isEqualTo: uid)
+                .whereField(KEY_TOID, isEqualTo: user.id ?? "")
+                .getDocuments { snapshot, err in
+                    if let err = err {
+                        print(err.localizedDescription)
+                        return
+                    }
+                    
+                    snapshot?.documents.forEach({ snapshot in
+                        snapshot.reference.delete()
+                    })
+                    
+                    self.isHeartPressed = false
+                }
+        } else {
+            // TODO: Heart가 눌려있지 않았다면 LikeCard를 추가하기
+            
+            let data: [String: Any] = [
+                KEY_FROMID: AuthViewModel.shared.currentUser?.id ?? "",
+                KEY_TOID: user.id ?? "",
+                KEY_TIMESTAMP: Timestamp(date: Date())
+            ]
+            
+            COLLECTION_LIKECARDS.document().setData(data) { _ in
+                self.isHeartPressed = true
+            }
+            
+        }
     }
     
     func fetchChattingInfo() async {

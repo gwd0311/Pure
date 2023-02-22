@@ -23,16 +23,18 @@ class MainViewModel: ObservableObject {
     var query: Query = COLLECTION_USERS
     
     init() {
-        loadUsers()
+        Task {
+            await loadUsers()
+        }
     }
     
-    func loadUsers() {
-        setFilter()
-        setQuery()
-        fetchUsers()
+    func loadUsers() async {
+        await setFilter()
+        await setQuery()
+        await fetchUsers()
     }
     
-    private func setFilter() {
+    private func setFilter() async {
         let gender = defaults.integer(forKey: DEFAULTS_MAIN_GENDER)
         let region = defaults.integer(forKey: DEFAULTS_MAIN_REGION)
         let lowerBound = defaults.float(forKey: DEFAULTS_MAIN_AGERANGE_LOWERBOUND)
@@ -42,13 +44,15 @@ class MainViewModel: ObservableObject {
             return
         }
         
-        self.gender = gender != -1 ? Gender(rawValue: gender) : nil
-        self.region = region != -1 ? Region(rawValue: region) : nil
-        self.ageRange = lowerBound...upperBound
+        DispatchQueue.main.async {
+            self.gender = gender != -1 ? Gender(rawValue: gender) : nil
+            self.region = region != -1 ? Region(rawValue: region) : nil
+            self.ageRange = lowerBound...upperBound
+        }
         print(gender, region, ageRange)
     }
     
-    private func setQuery() {
+    private func setQuery() async {
         
         if let gender = gender, let region = region {
             query = COLLECTION_USERS
@@ -70,31 +74,30 @@ class MainViewModel: ObservableObject {
         self.queriedUsers = self.users.filter({ $0.age >= Int(ageRange.lowerBound) && $0.age <= Int(ageRange.upperBound) })
     }
     
-    private func fetchUsers() {
-        query
+    private func fetchUsers() async {
+        let blackUserCount = AuthViewModel.shared.blackUids.count
+        let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
-            .limit(to: 7)
-            .getDocuments { snapshot, err in
-                if let err = err {
-                    print("Error:: \(err)")
-                    return
-                }
+            .limit(to: 10 + blackUserCount)
+            .getDocuments()
                 
-                guard let documents = snapshot?.documents else { return }
+        guard let documents = snapshot?.documents else { return }
+        
+        let users = documents.compactMap { try? $0.data(as: User.self) }
+            .filter { $0.id != Auth.auth().currentUser?.uid }
+            .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
 
-                let users = documents.compactMap { try? $0.data(as: User.self) }
-                    .filter { $0.id != Auth.auth().currentUser?.uid }
-
-                DispatchQueue.main.async {
-                    self.users.removeAll()
-                    self.users = users
-                    self.setQueriedUsers()
-                }
+        DispatchQueue.main.async {
+            self.users.removeAll()
+            self.queriedUsers.removeAll()
+            self.users = users
+            self.setQueriedUsers()
         }
+        
     }
     
     func fetchMoreUsers(user: User) async {
-        guard user.id == users.last?.id else { return }
+        guard user.id == queriedUsers.last?.id else { return }
         guard let lastDoc = try? await COLLECTION_USERS.document(queriedUsers.last?.id ?? "").getDocument() else { return DocumentSnapshot.initialize() }
         
         let snapshot = try? await query
@@ -107,6 +110,7 @@ class MainViewModel: ObservableObject {
         
         let users = documents.compactMap { try? $0.data(as: User.self) }
             .filter { $0.id != Auth.auth().currentUser?.uid }
+            .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
         
         DispatchQueue.main.async {
             self.users.removeAll()

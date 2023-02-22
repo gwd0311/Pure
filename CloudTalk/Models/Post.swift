@@ -25,11 +25,11 @@ struct Post: Identifiable, Decodable {
 
 let MOCK_POST = Post(
     uid: "RxuVbZB5zwakO64K5bbBoFFIuTn1",
-    nickname: "여잼",
+    nickname: "닉네임 오류",
     gender: .woman,
     age: 1,
     region: .busan,
-    content: "앙 기모",
+    content: "게시글을 불러오지 못했습니다.",
     likeUids: ["RxuVbZB5zwakO64K5bbBoFFIuTn1"],
     profileImageUrl: "",
     postImageUrl: "https://firebasestorage.googleapis.com:443/v0/b/fluttergram-faa5e.appspot.com/o/profile_images%2F0C12D688-F9F1-4EDE-B7B4-F3F506748685?alt=media&token=063127b5-713c-46d9-9d0d-86450e751569",

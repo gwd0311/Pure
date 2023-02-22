@@ -18,6 +18,8 @@ struct User: Identifiable, Decodable {
     let introduction: String
     let profileImageUrl: String
     let timestamp: Timestamp
+    let blackUids: [String]
+    let point: Int
 }
 
 enum Gender: Int, CaseIterable, Codable {
@@ -99,11 +101,13 @@ enum Region: Int, CaseIterable, Codable, Identifiable {
 }
 
 let MOCK_USER = User(
-    nickname: "여잼",
+    nickname: "    ",
     gender: .woman,
     age: 24,
     region: .daejeon,
-    introduction: "앙 애니 기모띠 애니 개꿀잼 인정?",
+    introduction: "데이터를 불러오지 못했습니다.",
     profileImageUrl: "",
-    timestamp: Timestamp(date: Date(timeInterval: TimeInterval(-20000), since: Date()))
+    timestamp: Timestamp(date: Date(timeInterval: TimeInterval(-20000), since: Date())),
+    blackUids: [],
+    point: 100
 )

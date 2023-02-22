@@ -13,13 +13,15 @@ struct MessageView: View {
     
     init(
         message: Message,
-        partnerUser: User,
+        profileImageUrl: String,
+        gender: Gender,
         previousDate: Date? = nil,
         shouldShowTime: Bool
     ) {
         self.viewModel = MessageViewModel(
             message: message,
-            partnerUser: partnerUser,
+            profileImageUrl: profileImageUrl,
+            gender: gender,
             previousDate: previousDate,
             shouldShowTime: shouldShowTime
         )
@@ -47,7 +49,13 @@ struct MessageView: View {
                 HStack(spacing: 0) {
                     VStack(spacing: 0) {
                         Spacer()
-                        ProfileImageView(user: viewModel.partnerUser, type: .circle, width: 32, height: 32)
+                        ProfileImageView(
+                            profileImageUrl: self.viewModel.profileImageUrl,
+                            gender: self.viewModel.gender,
+                            type: .circle,
+                            width: 32,
+                            height: 32
+                        )
                             .padding(.trailing, 8)
                     }
                     makeBubble(foregroundColor: ColorManager.black600, backgroundColor: ColorManager.black50, corners: [.topLeft, .topRight, .bottomRight])
