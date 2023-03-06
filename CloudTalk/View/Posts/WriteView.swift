@@ -17,8 +17,7 @@ struct WriteView: View {
     @State private var text = ""
     @State private var showTextPlaceHolder = true
     @State private var photoButtonText = "사진 추가"
-    
-    let onRegister: () -> Void
+    @State private var showPointAlert = false
     
     var body: some View {
         ScrollView {
@@ -28,6 +27,22 @@ struct WriteView: View {
             selectedPhoto
             
             Spacer()
+                .alert(isPresented: $showPointAlert) {
+                    Alert(
+                        title: Text("알림"),
+                        message: Text("오늘 게시물 작성으로 50포인트가 지급되었어요!"),
+                        dismissButton: .default(Text("확인"), action: {
+                            // TODO: viewModel에서 50포인트 올리기 + lastPointDate update하기
+                            isLoading = true
+                            viewModel.getPoint {
+                                isLoading = false
+                                AuthViewModel.shared.fetchUser()
+                                dismiss()
+                            }
+                            
+                        })
+                    )
+                }
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 18)
@@ -132,9 +147,12 @@ struct WriteView: View {
                 isLoading = true
                 await viewModel.register(image: image, text: text)
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
-                onRegister()
                 isLoading = false
-                dismiss()
+                if !AuthViewModel.shared.isPointReceivedToday {
+                    self.showPointAlert.toggle()
+                } else {
+                    dismiss()
+                }
             }
         } label: {
             Text("등록")
@@ -153,6 +171,6 @@ struct WriteView: View {
 
 struct WriteView_Previews: PreviewProvider {
     static var previews: some View {
-        WriteView(onRegister: {})
+        WriteView()
     }
 }

@@ -33,16 +33,25 @@ class ChatViewModel: ObservableObject {
                 snapShot?.documentChanges.forEach({ diff in
                     if (diff.type == .added) {
                         guard let chat = try? diff.document.data(as: Chat.self) else { return }
+                        guard let partnerUid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first else { return }
+                        
                         DispatchQueue.main.async {
-                            self.chats.append(contentsOf: chat)
-                            print(self.chats)
+                            if !AuthViewModel.shared.blackUids.contains(partnerUid) {
+                                self.chats.append(contentsOf: chat)
+                            }
                         }
                     }
                     if (diff.type == .modified) {
                         guard let chat = try? diff.document.data(as: Chat.self) else { return }
                         guard let index = self.chats.firstIndex(where: { $0.id == chat.id }) else { return }
+                        guard let partnerUid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first else { return }
+                        
                         DispatchQueue.main.async {
-                            self.chats[index] = chat
+                            if AuthViewModel.shared.blackUids.contains(partnerUid) {
+                                self.chats.remove(at: index)
+                            } else {
+                                self.chats[index] = chat
+                            }
                         }
                     }
                     if (diff.type == .removed) {

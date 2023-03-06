@@ -24,49 +24,46 @@ struct MainView: View {
                 .cornerRadius(36, corners: .topLeft)
                 .edgesIgnoringSafeArea(.bottom)
                 .padding(.top, 5)
-            if !isLoading {
-                VStack {
-                    Spacer().frame(height: 5)
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            LazyVStack(spacing: 0) {
-                                Spacer().frame(height: 12)
-                                ForEach(viewModel.queriedUsers) { user in
-                                    CustomNavigationLink {
-                                        DetailView(viewModel: DetailViewModel(user: user))
-                                    } label: {
-                                        UserCell(user: user)
-                                            .id(user.id)
-                                            .padding(.bottom, 12)
-                                            .task {
-                                                await viewModel.fetchMoreUsers(user: user)
-                                            }
-                                    }
-                                    .id(user.id)
+            VStack {
+                Spacer().frame(height: 5)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        LazyVStack(spacing: 0) {
+                            Spacer().frame(height: 12)
+                            ForEach(viewModel.queriedUsers) { user in
+                                CustomNavigationLink {
+                                    DetailView(user: user)
+                                } label: {
+                                    UserCell(user: user)
+                                        .id(user.id)
+                                        .padding(.bottom, 8)
+                                        .task {
+                                            await viewModel.fetchMoreUsers(user: user)
+                                        }
                                 }
-                                Spacer().frame(height: 100)
+                                .id(user.id)
                             }
+                            Spacer().frame(height: 100)
                         }
                     }
-                    .refreshable {
-                        await viewModel.loadUsers()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 18)
-                    .cornerRadius(36, corners: .topLeft)
-                    Spacer()
                 }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        titleLabel
-                    }
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        filterButton
-                    }
+                .refreshable {
+                    await viewModel.loadUsers()
                 }
-            } else {
-                EmptyView()
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+                .cornerRadius(36, corners: .topLeft)
+                Spacer()
             }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    titleLabel
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    filterButton
+                }
+            }
+            
         }
         .overlay(
             isLoading ? LoadingView() : nil
@@ -81,7 +78,7 @@ struct MainView: View {
     private var titleLabel: some View {
         Text("구름톡")
             .foregroundColor(.white)
-            .font(.gmarketSans(.bold, size: 24))
+            .font(.bmjua(.regular, size: 24))
     }
     
     private var filterButton: some View {
@@ -97,7 +94,7 @@ struct MainView: View {
         } label: {
             Image("filter")
         }
-
+        
     }
 }
 

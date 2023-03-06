@@ -9,157 +9,174 @@ import SwiftUI
 
 struct RegistrationView: View {
     
-    @ObservedObject var viewModel = RegistrationViewModel()
-    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var viewModel: AuthViewModel
     @State private var showImagePicker = false
-    @State private var currentProfileInfo: ProfileInfo = .nickname
-    @State private var showSheet = false
+
     @State private var isLoading = false
+    @State private var image: UIImage?
+    @State private var modalStatus: ModalStatus = .none
+    @State private var isModalActive = false
+    @State private var showAlert = false
+    
+    /// Input Values
+    @State private var nickName: String?
+    @State private var gender: Gender?
+    @State private var region: Region?
+    @State private var age: Int?
+    @State private var introduction: String?
+    
+    var isInputComplete: Bool {
+        self.nickName != nil && self.gender != nil && region != nil && self.age != nil && self.introduction != nil
+    }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                VStack {
-                    HStack {Spacer()}
-                    ScrollView {
-                        titlePart
-                        imageSelectorButton
-                        Divider()
-                        contentPart
-                        Spacer().frame(height: 100)
+        CustomNavigationView {
+            GeometryReader { geo in
+                ScrollView {
+                    VStack {
+                        let user = viewModel.currentUser ?? MOCK_USER
+                        ProfileImageButton(user: user, image: $image, showImagePicker: $showImagePicker)
+                            .padding(.top, 32)
+                            .padding(.bottom, 32)
+                        makeInputButtons(user: user)
+                        Spacer()
+                        makeStartButton()
                     }
-                }
-                .fullScreenCover(isPresented: $showImagePicker) {
-                    ImagePicker(image: $viewModel.image)
-                }
-                .halfSheet(showSheet: $showSheet) {
-                    switch currentProfileInfo {
-                    case .nickname:
-                        NicknameSheetView(viewModel: viewModel)
-                    case .gender:
-                        GenderSheetView(viewModel: viewModel)
-                    case .age:
-                        AgeSheetView(viewModel: viewModel)
-                    case .region:
-                        RegionSheetView(viewModel: viewModel)
-                    case .introduction:
-                        IntroductionSheetView(viewModel: viewModel)
-                    }
-                } onEnd: {
-                    
-                }
-                .onReceive(viewModel.$showSheet) { showSheet in
-                    self.showSheet = showSheet
+                    .frame(height: geo.size.height)
+                    .customNavigationTitle("프로필")
+                    .customNavBarItems(leading: makeBackButton())
+                    .onChange(of: modalStatus, perform: { status in
+                        if status == .none {
+                            isModalActive = false
+                        } else {
+                            isModalActive = true
+                        }
+                    })
                 }
             }
-            .navigationBarItems(trailing: saveButton)
         }
+        .alert("알림", isPresented: $showAlert, actions: {
+            
+        }, message: {
+            Text("프로필 정보 등록 중 오류가 발생하였습니다\n네트워크 상태를 확인 후 다시시도해주세요")
+        })
+        .overlay(
+            makeModal()
+        )
         .overlay(isLoading ? LoadingView() : nil)
     }
     
-    private var titlePart: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Text("프로필 정보 입력")
-                    .font(.cookieRun(.bold, size: 24))
-                    .padding(.leading, 30)
-                Spacer()
-            }
-            Spacer().frame(height: 10)
-            Text("다른 회원들에게 보여줄 프로필 정보를 입력해주세요!")
-                .font(.cookieRun(.regular, size: 14))
-                .foregroundColor(Color(.systemGray))
-                .padding(.leading, 30)
+    // MARK: - 뒤로가기 버튼
+    @ViewBuilder private func makeBackButton() -> some View {
+        Button {
+            self.viewModel.signOut()
+        } label: {
+            Image(systemName: "chevron.backward")
         }
     }
     
-    private var imageSelectorButton: some View {
+    // MARK: - input 버튼들
+    @ViewBuilder private func makeInputButtons(user: User) -> some View {
+        VStack(spacing: 0) {
+            ProfileInputButton(title: "닉네임", content: self.nickName ?? "", onClick: {
+                self.modalStatus = .nickName
+            })
+            ProfileInputButton(title: "성별", content: self.gender?.title ?? "", onClick: {
+                self.modalStatus = .gender
+            })
+            ProfileInputButton(title: "나이", content: self.age == nil ? "" : "\(self.age ?? 20)세", onClick: {
+                self.modalStatus = .age
+            })
+            ProfileInputButton(title: "지역", content: self.region?.title ?? "", onClick: {
+                self.modalStatus = .region
+            })
+            ProfileInputButton(title: "내 소개", content: self.introduction ?? "", onClick: {
+                self.modalStatus = .introduction
+            })
+        }
+    }
+    
+    @ViewBuilder private func makeStartButton() -> some View {
         Button {
+            // TODO: viewModel register
             isLoading = true
-            showImagePicker.toggle()
-        } label: {
-            if let image = viewModel.image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 150, height: 150)
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .shadow(radius: 5)
-                    .onAppear {
+            if let nickName = nickName,
+               let gender = gender,
+               let age = age,
+               let region = region,
+               let introduction = introduction {
+                viewModel.setCurrentUser(
+                    image: self.image,
+                    nickname: nickName,
+                    gender: gender,
+                    age: age,
+                    region: region,
+                    introduction: introduction,
+                    onSet: {
                         isLoading = false
+                        viewModel.fetchUser()
                     }
+                )
             } else {
-                Image(systemName: "cloud.fill")
-                    .font(.system(size: 100))
-                    .foregroundColor(.white)
-                    .frame(width: 150, height: 150)
-                    .padding()
-                    .background(.blue)
-                    .cornerRadius(15)
-                    .shadow(radius: 5)
-                    .overlay(
-                        Image(systemName: "plus")
-                            .font(.system(size: 30, weight: .black))
-                            .offset(y: 10)
-                    )
+                self.showAlert.toggle()
             }
-        }
-        .padding([.top, .bottom], 20)
-    }
-    
-    private var contentPart: some View {
-        VStack {
-            Spacer().frame(height: 32)
-            HStack {
-                Text("기본 정보")
-                    .font(.system(size: 18))
-                    .fontWeight(.black)
-                Spacer()
-            }
-            .padding(.bottom, 20)
-            Button {
-                currentProfileInfo = .nickname
-                showSheet.toggle()
-            } label: {
-                ProfileInfoView(title: "닉네임", content: viewModel.nickname ?? "입력")
-            }
-            Button {
-                currentProfileInfo = .gender
-                showSheet.toggle()
-            } label: {
-                ProfileInfoView(title: "성별", content: viewModel.gender?.title ?? "입력")
-            }
-            Button {
-                currentProfileInfo = .age
-                showSheet.toggle()
-            } label: {
-                ProfileInfoView(title: "나이", content: viewModel.age != nil ? String(viewModel.age ?? 0) : "입력")
-            }
-            Button {
-                currentProfileInfo = .region
-                showSheet.toggle()
-            } label: {
-                ProfileInfoView(title: "지역", content: viewModel.region?.title ?? "입력")
-            }
-            Button {
-                currentProfileInfo = .introduction
-                showSheet.toggle()
-            } label: {
-                ProfileInfoView(title: "소개", content: viewModel.introduction ?? "입력")
-            }
-        }.padding(.horizontal, 20)
-    }
-    
-    private var saveButton: some View {
-        Button {
-            viewModel.register {
-                withAnimation {
-                    authViewModel.fetchUser()
-                }
-            }
+            
         } label: {
-            Text("저장하고 시작하기")
-                .font(.cookieRun(.regular))
+            Text("시작하기")
+        }
+        .padding(.horizontal, 18)
+        .buttonStyle(MainButtonStyle(color: isInputComplete ? ColorManager.blue : ColorManager.black150))
+        .disabled(!isInputComplete)
+    }
+    
+    // MARK: - 모달들
+    @ViewBuilder private func makeModal() -> some View {
+        VStack {
+            if isModalActive {
+                if modalStatus == .nickName {
+                    NicknameInputModal(
+                        modalStatus: $modalStatus,
+                        onConfirm: { text in
+                            self.nickName = text
+                        })
+                } else if modalStatus == .gender {
+                    WheelPickerModal(
+                        modalStatus: $modalStatus,
+                        type: .gender,
+                        onConfirm: { genderValue in
+                            self.gender = Gender(rawValue: genderValue)
+                        },
+                        initialInt: self.gender?.rawValue ?? 0
+                    )
+                } else if modalStatus == .region {
+                    WheelPickerModal(
+                        modalStatus: $modalStatus,
+                        type: .region,
+                        onConfirm: { regionValue in
+                            self.region = Region(rawValue: regionValue)
+                        },
+                        initialInt: self.region?.rawValue ?? 0
+                    )
+                } else if modalStatus == .age {
+                    WheelPickerModal(
+                        modalStatus: $modalStatus,
+                        type: .age,
+                        onConfirm: { ageValue in
+                            self.age = ageValue
+                        },
+                        initialInt: self.age ?? 20
+                    )
+                } else if modalStatus == .introduction {
+                    IntroductionModal(
+                        modalStatus: $modalStatus,
+                        onConfirm: { introductionText in
+                            self.introduction = introductionText
+                        }
+                    )
+                }
+            } else {
+                EmptyView()
+            }
         }
     }
 }
@@ -167,5 +184,6 @@ struct RegistrationView: View {
 struct RegistrationView_Previews: PreviewProvider {
     static var previews: some View {
         RegistrationView()
+            .environmentObject(AuthViewModel())
     }
 }

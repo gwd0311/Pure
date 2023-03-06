@@ -157,7 +157,7 @@ struct ChatCell: View {
         CustomNavigationLink {
             // TODO: user 만들어서 넣어줘야함
             if let user = viewModel.user {
-                DetailView(viewModel: DetailViewModel(user: user))
+                DetailView(user: user)
             }
         } label: {
             Group {

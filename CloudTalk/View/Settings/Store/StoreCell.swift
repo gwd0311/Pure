@@ -12,7 +12,7 @@ struct StoreCell: View {
     let price: Int
     
     var ratio: Int {
-        let defaultPoint = Double(price) * (5.0 / 6.0)
+        let defaultPoint = Double(price) * (2.0 / 3.0)
         let bonusPoint = Double(point) - defaultPoint
         return Int(bonusPoint / defaultPoint * 100.0)
     }

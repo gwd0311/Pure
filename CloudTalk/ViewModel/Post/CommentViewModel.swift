@@ -5,7 +5,7 @@
 //  Created by hanjongwoo on 2023/02/14.
 //
 
-import Foundation
+import SwiftUI
 
 class CommentViewModel: ObservableObject {
     
@@ -14,21 +14,44 @@ class CommentViewModel: ObservableObject {
     
     init(comment: Comment) {
         self.comment = comment
-        fetchUser()
+        Task {
+            await fetchUser()
+        }
     }
     
-    private func fetchUser() {
+    private func fetchUser() async {
         let uid = comment.uid
         
-        COLLECTION_USERS.document(uid).getDocument { snapshot, err in
+        let snapshot = try? await COLLECTION_USERS.document(uid).getDocument()
+            
+        guard let user = try? snapshot?.data(as: User.self) else { return }
+        
+        DispatchQueue.main.async {
+            withAnimation {
+                self.user = user
+            }
+        }
+    }
+    
+    func masterDelete(completionHandler: @escaping () -> Void) {
+        COLLECTION_POSTS.document(comment.pid).collection("comments").document(comment.id ?? "").updateData([
+            KEY_COMMENT: "정책 위반으로 삭제된 댓글입니다."
+        ]) { err in
             if let err = err {
                 print(err.localizedDescription)
                 return
             }
-            
-            guard let user = try? snapshot?.data(as: User.self) else { return }
-            
-            self.user = user
+            completionHandler()
+        }
+    }
+    
+    func delete(completionHandler: @escaping () -> Void) {
+        COLLECTION_POSTS.document(comment.pid).collection("comments").document(comment.id ?? "").delete { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            completionHandler()
         }
     }
 }

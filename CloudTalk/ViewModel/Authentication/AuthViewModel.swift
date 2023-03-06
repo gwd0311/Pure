@@ -17,16 +17,14 @@ import FirebaseStorage
 class AuthViewModel: NSObject, ObservableObject {
     
     @Published var nonce = ""
-    @Published var phoneNumber: String = ""
-    @Published var verificationCode: String = ""
     @Published var userSession: Firebase.User?
     @Published var currentUser: User?
     @Published var verificationId: String = ""
-    @Published var showVerificationView = false
     
-    @Published var alertMsg = ""
-    @Published var showAlert = false
-    @Published var isLoading = false
+    @Published var isPushOn = true
+    @Published var isPointAlertComplete = false
+    
+    var interstitialAd = InterstitialAd()
     
     static let shared = AuthViewModel()
     
@@ -37,13 +35,36 @@ class AuthViewModel: NSObject, ObservableObject {
         fetchUser()
     }
     
+    // MARK: - 포인트 수령여부
+    var isPointReceivedToday: Bool {
+        let calendar = Calendar.current
+        if let lastPointDate = currentUser?.lastPointDate.dateValue() {
+            if calendar.isDateInToday(lastPointDate) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }        
+    }
+    
+    // MARK: - 운영자 여부
+    var isManager: Bool {
+        if let uid = self.currentUser?.id {
+            return uid == "hzXN4S3BynXeOGzKa2N2ccekRPi2"
+        } else {
+            return false
+        }
+    }
+    
+    // MARK: - 차단 목록
     var blackUids: [String] {
         self.currentUser?.blackUids ?? []
     }
     
+    // MARK: - 차단 해제
     func unBlock(uid: String, onUnBlock: @escaping () -> Void) {
-        /// firestore의 arrayRemove는 timestamp가 저장될 경우, 같은 문자열이라도 다르게 저장할 수 있다.
-        /// 그렇기 때문에 getDocument로 지울 항목을 가져와서 지워야한다.
         
         let ref = COLLECTION_USERS.document(currentUser?.id ?? "")
         
@@ -54,12 +75,166 @@ class AuthViewModel: NSObject, ObservableObject {
                 print(err.localizedDescription)
                 return
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                onUnBlock()
+            self.fetchUser()
+            onUnBlock()
+        }
+    }
+    
+    // MARK: - 채팅방 프로필정보 업데이트
+    /// 채팅방의 경우 addsnapshotListner로 인해 실시간 업데이트를 해줘야해서..
+    /// 비동기로 데이터를 가져올 경우 깜빡거리는 현상 등 UX가 불안정해져서 미리 넣어주었다.
+    private func updateChatRoomProfile(uid: String, profileImageUrl: String? = nil, nickname: String) {
+        COLLECTION_CHATS.whereField(KEY_UIDS, arrayContains: uid).getDocuments { snapshot, err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            
+            snapshot?.documents.forEach({ snapshot in
+                
+                guard let chat = try? snapshot.data(as: Chat.self) else { return }
+                
+                if let profileImageUrl = profileImageUrl {
+                    var profileImages = chat.userProfileImages
+                    var nicknames = chat.userNickNames
+                    profileImages[uid] = profileImageUrl
+                    nicknames[uid] = nickname
+                    
+                    snapshot.reference.updateData([
+                        KEY_USER_PROFILE_IMAGES: profileImages,
+                        KEY_USER_NICKNAMES: nicknames
+                    ])
+                } else {
+                    var nicknames = chat.userNickNames
+                    nicknames[uid] = nickname
+                    
+                    snapshot.reference.updateData([
+                        KEY_USER_NICKNAMES: nicknames
+                    ])
+                }
+                
+                
+                
+            })
+        }
+    }
+    
+    // MARK: - 새로온 채팅 있는지 체크
+    func checkNewChat(completionHandler: @escaping (_ isNew: Bool) -> Void) {
+        
+        guard let uid = currentUser?.id else { return }
+        
+        COLLECTION_CHATS
+            .whereField(KEY_UIDS, arrayContains: uid)
+            .order(by: KEY_TIMESTAMP, descending: true)
+            .limit(to: 1)
+            .getDocuments { snapshot, err in
+                if let err = err {
+                    print(err.localizedDescription)
+                    completionHandler(false)
+                    return
+                }
+                
+                guard let newChat = try? snapshot?.documents.first?.data(as: Chat.self) else {
+                    completionHandler(false)
+                    return
+                }
+                
+                guard let partnerUid = newChat.uids.filter({ $0 != uid }).first else { return }
+                
+                if newChat.unReadMessageCount[partnerUid] == 0 {
+                    completionHandler(false)
+                } else {
+                    completionHandler(true)
+                }
+            }
+    }
+    
+    // MARK: - 영구정지 목록 체크
+    func checkBanList(completionHandler: @escaping (_ isBan: Bool) -> Void) {
+        COLLECTION_BANUSERS.document(currentUser?.id ?? "").getDocument { snapshot , err in
+            if let err = err {
+                print(err.localizedDescription)
+                completionHandler(false)
+                return
+            }
+            
+            guard (try? snapshot?.data(as: BannedUser.self)) != nil else {
+                completionHandler(false)
+                return
+            }
+            
+            completionHandler(true)
+        }
+    }
+    
+    // MARK: - 앱 강제종료
+    func systemOff() {
+        UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            exit(0)
+        }
+    }
+    
+    // MARK: - 프로필 등록
+    func setCurrentUser(
+        image: UIImage?,
+        nickname: String,
+        gender: Gender,
+        age: Int,
+        region: Region,
+        introduction: String,
+        onSet: @escaping () -> Void
+    ) {
+        guard let uid = self.userSession?.uid else { return }
+        if let image = image {
+            ImageUploader.uploadImage(image: image) { imgUrl in
+                let data: [String: Any] = [
+                    KEY_NICKNAME: nickname,
+                    KEY_GENDER: gender.rawValue,
+                    KEY_AGE: age,
+                    KEY_REGION: region.rawValue,
+                    KEY_INTRODUCTION: introduction,
+                    KEY_PROFILE_IMAGE_URL: imgUrl,
+                    KEY_TIMESTAMP: Timestamp(date: Date()),
+                    KEY_BLACK_UIDS: [],
+                    KEY_POINT: 100,
+                    KEY_IS_PUSH_ON: true,
+                    KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
+                ]
+                COLLECTION_USERS.document(uid).setData(data) { err in
+                    if let err = err {
+                        print(err.localizedDescription)
+                        return
+                    }
+                    onSet()
+                }
+            }
+        } else {
+            let data: [String: Any] = [
+                KEY_NICKNAME: nickname,
+                KEY_GENDER: gender.rawValue,
+                KEY_AGE: age,
+                KEY_REGION: region.rawValue,
+                KEY_INTRODUCTION: introduction,
+                KEY_PROFILE_IMAGE_URL: "",
+                KEY_TIMESTAMP: Timestamp(date: Date()),
+                KEY_BLACK_UIDS: [],
+                KEY_POINT: 100,
+                KEY_IS_PUSH_ON: true,
+                KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
+            ]
+            COLLECTION_USERS.document(uid).setData(data) { err in
+                if let err = err {
+                    print(err.localizedDescription)
+                    return
+                }
+                onSet()
             }
         }
     }
     
+    // MARK: - 프로필 편집 업데이트
     func updateCurrentUser(
         image: UIImage?,
         nickname: String,
@@ -70,7 +245,6 @@ class AuthViewModel: NSObject, ObservableObject {
         onUpdate: @escaping () -> Void
     ) {
         guard let uid = self.currentUser?.id else { return }
-        
         if let image = image {
             if let profileUrl = currentUser?.profileImageUrl {
                 if !profileUrl.isEmpty {
@@ -82,7 +256,6 @@ class AuthViewModel: NSObject, ObservableObject {
                     }
                 }
             }
-
             ImageUploader.uploadImage(image: image) { imgUrl in
                 let data: [String: Any] = [
                     KEY_PROFILE_IMAGE_URL: imgUrl,
@@ -97,6 +270,7 @@ class AuthViewModel: NSObject, ObservableObject {
                         print(err.localizedDescription)
                         return
                     }
+                    self.updateChatRoomProfile(uid: uid, profileImageUrl: imgUrl, nickname: nickname)
                     onUpdate()
                 }
             }
@@ -104,9 +278,9 @@ class AuthViewModel: NSObject, ObservableObject {
         } else {
             let data: [String: Any] = [
                 KEY_NICKNAME: nickname,
-                KEY_GENDER: gender,
+                KEY_GENDER: gender.rawValue,
                 KEY_AGE: age,
-                KEY_REGION: region,
+                KEY_REGION: region.rawValue,
                 KEY_INTRODUCTION: introduction
             ]
             COLLECTION_USERS.document(uid).updateData(data) { err in
@@ -114,15 +288,13 @@ class AuthViewModel: NSObject, ObservableObject {
                     print(err.localizedDescription)
                     return
                 }
+                self.updateChatRoomProfile(uid: uid, nickname: nickname)
                 onUpdate()
             }
         }
     }
     
-    private func updateData() {
-        
-    }
-    
+    // MARK: - 차단하기
     func blackUser(uid: String, completion: @escaping () -> Void) {
         guard let currentUid = currentUser?.id else { return }
         COLLECTION_USERS.document(currentUid).updateData([
@@ -137,39 +309,34 @@ class AuthViewModel: NSObject, ObservableObject {
         }
     }
     
-    func sendCode() {
+    // MARK: - 인증번호 보내기
+    func sendCode(phoneNumber: String, completionHandler: @escaping (_ isSuccess: Bool) -> Void) {
         
         let number = "+82\(phoneNumber)"
         
-        self.isLoading = true
         PhoneAuthProvider.provider().verifyPhoneNumber(number, uiDelegate: nil) { code, err in
-            self.isLoading = false
-            if err != nil {
-                self.alertMsg = "인증이 잘못되었습니다."
-                withAnimation {
-                    self.showAlert.toggle()
-                }
+            if let err = err {
+                print(err.localizedDescription)
+                completionHandler(false)
                 return
             }
             
             self.verificationId = code ?? ""
-            self.showVerificationView.toggle()
+            completionHandler(true)
         }
     }
     
-    func verifyCode() {
+    // MARK: - 인증번호 검증하기
+    func verifyCode(verificationCode: String, completionHandler: @escaping (_ isSuccess: Bool) -> Void) {
         let credential = PhoneAuthProvider.provider().credential(withVerificationID: self.verificationId, verificationCode: verificationCode)
-        self.isLoading = true
         Auth.auth().signIn(with: credential) { result, err in
-            self.isLoading = false
             if let err = err {
                 print("Error:: \(err)")
-                self.alertMsg = "인증번호 검증이 잘못되었습니다."
-                withAnimation {
-                    self.showAlert.toggle()
-                }
+                completionHandler(false)
                 return
             }
+            
+            completionHandler(true)
             
             withAnimation {
                 self.userSession = result?.user
@@ -179,44 +346,126 @@ class AuthViewModel: NSObject, ObservableObject {
         
     }
     
-    func requestCode() {
+    // MARK: - 인증번호 재전송 요청
+    func requestCode(phoneNumber: String, completionHandler: @escaping (_ isSuccess: Bool) -> Void) {
         
         let number = "+82\(phoneNumber)"
-        self.isLoading = true
         PhoneAuthProvider.provider().verifyPhoneNumber(number, uiDelegate: nil) { code, err in
-            self.isLoading = false
-            if err != nil {
-                self.alertMsg = "인증번호 재전송 중 오류가 발생하였습니다."
-                withAnimation {
-                    self.showAlert.toggle()
-                }
+            if let err = err {
+                completionHandler(false)
+                print(err.localizedDescription)
                 return
             }
             
             self.verificationId = code ?? ""
-            
-            withAnimation {
-                self.alertMsg = "인증번호가 발송되었습니다."
-                self.showAlert.toggle()
-            }
+            completionHandler(true)
         }
-        
     }
     
+    // MARK: - 로그아웃
     func signOut() {
-        self.userSession = nil
-        self.currentUser = nil
-        self.alertMsg = ""
-        self.showAlert = false
+        self.clearSession()
         try? Auth.auth().signOut()
     }
     
+    // MARK: - 세션 클리어
+    func clearSession() {
+        DispatchQueue.main.async {
+            self.userSession = nil
+            self.currentUser = nil
+        }
+    }
+       
+    // MARK: - 회원탈퇴
+    func withdrawal(completionHandler: @escaping (_ isSuccess: Bool) -> Void) {
+        Task {
+            await self.removeData()
+            Auth.auth().currentUser?.delete(completion: { err in
+                if let err = err {
+                    print(err.localizedDescription)
+                    completionHandler(false)
+                    return
+                }
+                completionHandler(true)
+            })
+        }
+    }
+    
+    func removeData() async {
+        guard let uid = currentUser?.id else { return }
+        
+        if let chatSnapshots = try? await COLLECTION_CHATS.whereField(KEY_UIDS, arrayContains: uid).getDocuments() {
+            chatSnapshots.documents.forEach { snapshot in
+                snapshot.reference.delete()
+            }
+        }
+        
+        if let likeCardFromIdSnapshots = try? await COLLECTION_LIKECARDS.whereField(KEY_FROMID, isEqualTo: uid).getDocuments() {
+            likeCardFromIdSnapshots.documents.forEach { snapshot in
+                snapshot.reference.delete()
+            }
+        }
+        
+        if let likeCardToIdSnapshots = try? await COLLECTION_LIKECARDS.whereField(KEY_FROMID, isEqualTo: uid).getDocuments() {
+            likeCardToIdSnapshots.documents.forEach { snapshot in
+                snapshot.reference.delete()
+            }
+        }
+                
+        if let reportSnapshots = try? await COLLECTION_REPORTS.whereField(KEY_FROMID, isEqualTo: uid).getDocuments() {
+            reportSnapshots.documents.forEach { snapshot in
+                snapshot.reference.delete()
+            }
+        }
+        try? await COLLECTION_POSTS.document(uid).delete()
+        try? await COLLECTION_TOKENS.document(uid).delete()
+        try? await COLLECTION_USERS.document(uid).delete()
+    }
+    
+    // MARK: - 유저 정보 가져오기
     func fetchUser() {
         guard let uid = userSession?.uid else { return }
         
-        COLLECTION_USERS.document(uid).getDocument { snapshot, _ in
-            guard let user = try? snapshot?.data(as: User.self) else { return }
+        COLLECTION_USERS.document(uid).getDocument { snapshot, err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            guard let user = try? snapshot?.data(as: User.self) else {
+                return
+            }
             self.currentUser = user
+            self.updateToken()
+        }
+    }
+    
+    // MARK: - 푸쉬알림 토큰 세팅
+    private func updateToken() {
+        guard let uid = userSession?.uid,
+              let token = UserDefaults.standard.string(forKey: "token")
+        else {
+            return
+        }
+        
+        let data = ["token": token]
+        COLLECTION_TOKENS.document(uid).setData(data) { error in
+            if let error = error {
+                print("DEBUG: 토큰을 세팅하는데 실패했습니다. \(error)")
+                return
+            }
+        }
+    }
+    
+    // MARK: - 푸쉬알림 정보 업데이트
+    func updatePushInfo(isPushOn: Bool) {
+        guard let uid = userSession?.uid else { return }
+        COLLECTION_USERS.document(uid).updateData([
+            KEY_IS_PUSH_ON: isPushOn
+        ]) { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
         }
     }
     
@@ -263,15 +512,15 @@ enum ProfileInfo {
 extension AuthViewModel {
     
     func sha256(_ input: String) -> String {
-      let inputData = Data(input.utf8)
-      let hashedData = SHA256.hash(data: inputData)
-      let hashString = hashedData.compactMap {
-        String(format: "%02x", $0)
-      }.joined()
-
-      return hashString
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        let hashString = hashedData.compactMap {
+            String(format: "%02x", $0)
+        }.joined()
+        
+        return hashString
     }
-
+    
     func randomNonceString(length: Int = 32) -> String {
         precondition(length > 0)
         let charset: [Character] =

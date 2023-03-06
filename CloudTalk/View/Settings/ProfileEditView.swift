@@ -28,7 +28,7 @@ struct ProfileEditView: View {
     @State private var showNickNameModal = false
     
     /// Input Value
-    @State private var nickName = AuthViewModel.shared.currentUser?.nickname ?? ""
+    @State private var nickName = AuthViewModel.shared.currentUser?.nickname
     @State private var gender = AuthViewModel.shared.currentUser?.gender
     @State private var region = AuthViewModel.shared.currentUser?.region
     @State private var age = AuthViewModel.shared.currentUser?.age
@@ -41,7 +41,7 @@ struct ProfileEditView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     let user = viewModel.currentUser ?? MOCK_USER
-                    makeProfileImageButton(user: user)
+                    ProfileImageButton(user: user, image: $image, showImagePicker: $showImagePicker)
                         .padding(.top, 32)
                         .padding(.bottom, 32)
                     makeInputButtons(user: user)
@@ -49,15 +49,17 @@ struct ProfileEditView: View {
                     Spacer()
                     Button {
                         // TODO: viewModel 수정이벤트 추가
+                        isLoading = true
                         viewModel.updateCurrentUser(
                             image: image,
-                            nickname: nickName,
-                            gender: gender ?? .man,
-                            age: age ?? 20,
-                            region: region ?? .seoul,
-                            introduction: introduction ?? "",
+                            nickname: nickName ?? user.nickname,
+                            gender: gender ?? user.gender,
+                            age: age ?? user.age,
+                            region: region ?? user.region,
+                            introduction: introduction ?? user.introduction,
                             onUpdate: {
                                 viewModel.fetchUser()
+                                isLoading = false
                                 dismiss()
                             }
                         )
@@ -69,6 +71,9 @@ struct ProfileEditView: View {
                 }
                 .frame(height: geo.size.height)
             }
+            .overlay(
+                isLoading ? LoadingView() : nil
+            )
             .onDisappear {
                 AuthViewModel.shared.fetchUser()
             }
@@ -83,9 +88,7 @@ struct ProfileEditView: View {
                 makeModal()
             )
             .customNavigationTitle("프로필 편집")
-            .fullScreenCover(isPresented: $showImagePicker) {
-                ImagePicker(image: $image)
-            }
+            
         }
     }
     
@@ -141,79 +144,24 @@ struct ProfileEditView: View {
     }
     
     @ViewBuilder private func makeInputButtons(user: User) -> some View {
-        makeInputButton(title: "닉네임", content: self.nickName, action: {
+        ProfileInputButton(title: "닉네임", content: self.nickName ?? "입력해주세요", onClick: {
             self.modalStatus = .nickName
         })
         
-        makeInputButton(title: "성별", content: self.gender?.title ?? "입력해주세요", action: {
+        ProfileInputButton(title: "성별", content: self.gender?.title ?? "입력해주세요", onClick: {
             self.modalStatus = .gender
         })
-        makeInputButton(title: "나이", content: self.age == nil ? "입력해주세요" : "\(self.age ?? 20)세", action: {
+        ProfileInputButton(title: "나이", content: self.age == nil ? "입력해주세요" : "\(self.age ?? 20)세", onClick: {
             self.modalStatus = .age
         })
-        makeInputButton(title: "지역", content: self.region?.title ?? "입력해주세요", action: {
+        ProfileInputButton(title: "지역", content: self.region?.title ?? "입력해주세요", onClick: {
             self.modalStatus = .region
         })
-        makeInputButton(title: "내 소개", content: self.introduction ?? "입력해주세요", action: {
+        ProfileInputButton(title: "내 소개", content: self.introduction ?? "입력해주세요", onClick: {
             self.modalStatus = .introduction
         })
     }
     
-    @ViewBuilder private func makeInputButton(title: String, content: String, action: @escaping () -> Void) -> some View {
-        Button {
-            action()
-        } label: {
-            VStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    Text(title)
-                    Spacer()
-                    Text(content.components(separatedBy: " ").joined().isEmpty ? "입력해주세요" : content)
-                        .foregroundColor(content.components(separatedBy: " ").joined().isEmpty ? ColorManager.black200 : ColorManager.black600)
-                        .lineLimit(1)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-            }
-            .background(ColorManager.black30)
-            .cornerRadius(14)
-            .padding(.horizontal, 18)
-            .padding(.bottom, 10)
-        }
-        .tint(.black)
-    }
-    
-    @ViewBuilder private func makeProfileImageButton(user: User) -> some View {
-        Button {
-            // TODO: 이미지 업로더 열기
-            showImagePicker.toggle()
-        } label: {
-            if let image = image {
-                Color.clear
-                    .aspectRatio(contentMode: .fill)
-                    .overlay(
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                    )
-                    .frame(width: 136, height: 136)
-                    .clipped()
-                    .contentShape(Rectangle())
-                    .cornerRadius(40)
-                    .shadow(color: ColorManager.black500.opacity(0.08), radius: 8, x: 0, y: 0)
-            } else {
-                ProfileImageView(
-                    profileImageUrl: user.profileImageUrl,
-                    gender: user.gender,
-                    type: .roundRect,
-                    width: 136,
-                    height: 136,
-                    radius: 40
-                )
-                .shadow(color: ColorManager.black500.opacity(0.08), radius: 8, x: 0, y: 0)
-            }
-            
-        }
-    }
 }
 
 struct ProfileEditView_Previews: PreviewProvider {
@@ -222,3 +170,5 @@ struct ProfileEditView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+
+

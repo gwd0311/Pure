@@ -26,6 +26,7 @@ struct ColorManager {
     static let divider = Color("divider")
     static let blue = Color("blue")
     static let skyBlue = Color("skyBlue")
+    static let skyBlueDark = Color("skyBlueDark")
     static let pink = Color("pink")
     static let pinkDark = Color("pinkDark")
     static let tabBar = Color("tabBar")
@@ -34,4 +35,5 @@ struct ColorManager {
     static let redLight = Color("redLight")
     static let red = Color("red")
     static let purpleLight = Color("purpleLight")
+    static let purpleDark = Color("purpleDark")
 }

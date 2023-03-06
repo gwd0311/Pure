@@ -6,19 +6,32 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct SplashView: View {
+    @State private var showGif = false
     var body: some View {
         ZStack {
-            Color.cyan
+            LinearGradient(colors: [ColorManager.skyBlueDark, ColorManager.purpleDark], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
-            VStack {
-                Image("cloud")
+            
+            if showGif {
+                AnimatedImage(name: "cloudHeart.gif")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 150, height: 150)
-                    .shadow(radius: 3)
+                    .frame(width: 400, height: 400)
+            } else {
+                ProgressView()
             }
+            
+            Image("cloudtalk")
+                .padding(.top, 200)
+        }
+        .onAppear {
+            self.showGif = true
+        }
+        .onDisappear {
+            self.showGif = false
         }
     }
 }

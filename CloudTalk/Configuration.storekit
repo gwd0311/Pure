@@ -1,0 +1,95 @@
+{
+  "identifier" : "CBDF1B39",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "6445793676",
+      "localizations" : [
+        {
+          "description" : "1,000 포인트를 구매합니다.",
+          "displayName" : "1,000 포인트",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "com.jerry.point1",
+      "referenceName" : "1,000 point",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "6445794075",
+      "localizations" : [
+        {
+          "description" : "12,000 포인트를 구매합니다.",
+          "displayName" : "12,000 포인트",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "com.jerry.point4",
+      "referenceName" : "12,000 point",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "18.99",
+      "familyShareable" : false,
+      "internalID" : "6445794060",
+      "localizations" : [
+        {
+          "description" : "25,200 포인트를 구매합니다.",
+          "displayName" : "25,200 포인트",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "com.jerry.point5",
+      "referenceName" : "25,200 point",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "6445793845",
+      "localizations" : [
+        {
+          "description" : "3,250 포인트를 구매합니다.",
+          "displayName" : "3,250 포인트",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "com.jerry.point2",
+      "referenceName" : "3,250 point",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5.99",
+      "familyShareable" : false,
+      "internalID" : "6445793908",
+      "localizations" : [
+        {
+          "description" : "6,800 포인트를 구매합니다.",
+          "displayName" : "6,800 포인트",
+          "locale" : "ko"
+        }
+      ],
+      "productID" : "com.jerry.point3",
+      "referenceName" : "6,800 point",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1673697663",
+    "_developerTeamID" : "KJZPA3T2S5",
+    "_lastSynchronizedDate" : 698757045.30871701
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

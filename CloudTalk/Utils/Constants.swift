@@ -12,6 +12,8 @@ let COLLECTION_POSTS = Firestore.firestore().collection("posts")
 let COLLECTION_CHATS = Firestore.firestore().collection("chats")
 let COLLECTION_LIKECARDS = Firestore.firestore().collection("likeCards")
 let COLLECTION_REPORTS = Firestore.firestore().collection("reports")
+let COLLECTION_TOKENS = Firestore.firestore().collection("tokens")
+let COLLECTION_BANUSERS = Firestore.firestore().collection("banUsers")
 
 // User
 let KEY_NICKNAME = "nickname"
@@ -22,7 +24,9 @@ let KEY_INTRODUCTION = "introduction"
 let KEY_PROFILE_IMAGE_URL = "profileImageUrl"
 let KEY_BLACK_UIDS = "blackUids"
 let KEY_POINT = "point"
+let KEY_IS_PUSH_ON = "isPushOn"
 let KEY_TIMESTAMP = "timestamp"
+let KEY_LAST_POINT_DATE = "lastPointDate"
 // Post
 let KEY_UID = "uid"
 let KEY_CONTENT = "content"
@@ -31,6 +35,7 @@ let KEY_LIKE_COUNT = "likeCount"
 let KEY_LIKE_UIDS = "likeUids"
 let KEY_COMMENT_COUNT = "commentCount"
 // Comment
+let KEY_PID = "pid"
 let KEY_COMMENT = "comment"
 // Chat
 let KEY_USER_NICKNAMES = "userNickNames"

@@ -7,52 +7,68 @@
 
 import SwiftUI
 import AuthenticationServices
+import SDWebImageSwiftUI
 
 struct LoginView: View {
     
     @EnvironmentObject var viewModel: AuthViewModel
     @State private var showPhoneRegisterView = false
+    @State private var imageData: Data? = nil
+    @State private var showGif = false
     
     var body: some View {
         NavigationView {
             ZStack {
-                Image("bg")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: UIScreen.main.bounds.width)
-                    .overlay(Color.black.opacity(0.35))
+                LinearGradient(colors: [ColorManager.skyBlueDark, ColorManager.purpleDark], startPoint: .topLeading, endPoint: .bottomTrailing)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 25) {
-                    Text("CloudTalk")
-                        .font(.largeTitle)
-                        .fontWeight(.heavy)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("가까운\n동네친구 찾기")
-                            .font(.system(size: 45))
-                            .fontWeight(.heavy)
-                            .foregroundColor(.white)
-                        Text("구름톡에서 연령, 성별, 지역별로 자유롭게 마음이 맞는 친구들을 찾아보세요!")
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                CustomNavigationLink(
+                    destination: { PhoneAuthView() },
+                    isActive: $showPhoneRegisterView,
+                    label: {
+                        Text("").hidden()
                     }
-                    .padding(.horizontal, 30)
+                )
+                
+                VStack(spacing: 10) {
                     
-                    Spacer()
+                    if showGif {
+                        AnimatedImage(name: "cloudMain.gif")
+                            .resizable()
+                            .frame(width: 280, height: 280)
+                    } else {
+                        ProgressView()
+                            .frame(width: 280, height: 280)
+                    }
                     
-                    phoneLoginButton
+                    Image("cloudtalk")
+                        .padding(.bottom, 20)
                     
-                    appleLoginButton
+                    VStack {
+                        Text("가까운 동네친구 찾기")
+                            .font(.system(size: 26, weight: .black))
+                            .padding(.top, 44)
+                            .padding(.bottom, 14)
+                        Text("구름톡에서 연령, 성별, 지역별로 자유롭게\n마음이 맞는 친구들을 찾아보세요!")
+                            .font(.system(size: 15, weight: .light))
+                            .foregroundColor(ColorManager.black400)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                        appleLoginButton
+                            .padding(.bottom, 6)
+                        phoneLoginButton
+                    }
+                    .frame(maxWidth: .infinity)
+                    .background(.white)
+                    .cornerRadius(30, corners: [.topLeft, .topRight])
+                    .ignoresSafeArea()
                 }
             }
-            .fullScreenCover(isPresented: $showPhoneRegisterView) {
-                PhoneAuthView()
+            .onAppear {
+                self.showGif = true
+            }
+            .onDisappear {
+                self.showGif = false
             }
         }
     }
@@ -64,19 +80,26 @@ struct LoginView: View {
                 showPhoneRegisterView.toggle()
             }
         } label: {
-            Text("📞  휴대폰 번호로 시작하기")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
-                .frame(height: 55)
-                .frame(maxWidth: .infinity)
-                .background(ColorManager.phoneLoginColor)
-                .clipShape(Capsule())
-                .padding(.horizontal, 40)
+            HStack {
+                Image("phone")
+                Text("휴대폰 번호로 시작하기")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(ColorManager.black600)
+            }
+            .frame(height: 58)
+            .frame(maxWidth: .infinity)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(lineWidth: 2)
+                    .foregroundColor(ColorManager.black150)
+            )
+            .padding(.horizontal, 30)
+            .padding(.bottom, 130)
         }
     }
     
     private var appleLoginButton: some View {
-        SignInWithAppleButton { request in
+        SignInWithAppleButton(.signIn) { request in
             // 애플로그인에 파라미터를 요청하기
             viewModel.nonce = viewModel.randomNonceString()
             request.requestedScopes = [.email, .fullName]
@@ -96,11 +119,10 @@ struct LoginView: View {
                 print(error.localizedDescription)
             }
         }
-        .signInWithAppleButtonStyle(.white)
-        .frame(height: 55)
-        .clipShape(Capsule())
-        .padding(.horizontal, 40)
-        .padding(.bottom, 70)
+        .signInWithAppleButtonStyle(.black)
+        .frame(height: 58)
+        .cornerRadius(16)
+        .padding(.horizontal, 30)
     }
 }
 

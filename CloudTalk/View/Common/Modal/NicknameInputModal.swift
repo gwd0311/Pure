@@ -44,7 +44,9 @@ struct NicknameInputModal: View {
                     VStack {
                         TextField("2~6자, 특수문자 불가능", text: $text)
                             .introspectTextField(customize: { textField in
-                                textField.becomeFirstResponder()
+                                DispatchQueue.main.async {
+                                    textField.becomeFirstResponder()
+                                }
                             })
                             .padding(.horizontal, 18)
                             .padding(.vertical, 14)

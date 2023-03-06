@@ -14,6 +14,8 @@ struct SendMessageView: View {
     let onDimiss: () -> Void
     @State private var text = ""
     @State private var isLoading = false
+    @State private var showPointAlert = false
+    @State private var showStoreView = false
     
     var body: some View {
         let user = viewModel.user
@@ -33,9 +35,27 @@ struct SendMessageView: View {
             Text("50포인트로 대화를 시작해보세요!")
                 .foregroundColor(ColorManager.black400)
                 .font(.system(size: 15, weight: .light))
+            CustomNavigationLink(
+                destination: { StoreView() } ,
+                isActive: $showStoreView,
+                label: { Text("").hidden() }
+            )
             Spacer()
             messageInputSection
         }
+        .alert(isPresented: $showPointAlert, content: {
+            Alert(
+                title: Text("포인트 부족"),
+                message: Text("포인트가 부족합니다. 스토어로 이동하시겠습니까?"),
+                primaryButton: .default(Text("예"), action: {
+                    // TODO: StoreView Sheet 띄우기
+                    self.showStoreView.toggle()
+                }),
+                secondaryButton: .cancel(Text("아니오"), action: {
+                    self.showPointAlert.toggle()
+                })
+            )
+        })
         .customNavigationTitle(user.nickname)
         .customNavBarItems(trailing: Image("more").hidden())
     }
@@ -85,12 +105,18 @@ struct SendMessageView: View {
                 Button {
                     Task {
                         isLoading = true
-                        await viewModel.setChats(text: text)
-                        self.text = ""
-                        hideKeyboard()
-                        onDimiss()
-                        dismiss()
+                        if await viewModel.checkPoint() {
+                            await viewModel.setChats(text: text)
+                            self.text = ""
+                            hideKeyboard()
+                            onDimiss()
+                            dismiss()
+                        } else {
+                            // TODO: Alert 띄우기
+                            self.showPointAlert.toggle()
+                        }
                         isLoading = false
+
                     }
                 } label: {
                     if text.isEmpty {

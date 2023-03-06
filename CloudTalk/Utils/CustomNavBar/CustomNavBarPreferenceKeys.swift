@@ -92,12 +92,16 @@ extension View {
 
 extension UINavigationController: ObservableObject, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
     
+    /// 원인: swipe 하는 도중에 view가 변경되면 버그가 생긴다.
+    /// 해결: swipe가 끝나면 View가 변경되도록 하는게 좋을 것 같다.
+    
     override open func viewDidLoad() {
         super.viewDidLoad()
-        interactivePopGestureRecognizer?.delegate = self
+        interactivePopGestureRecognizer?.delegate = nil
     }
-
+    
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         return viewControllers.count > 1
     }
+    
 }

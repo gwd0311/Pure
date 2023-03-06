@@ -15,16 +15,21 @@ struct PostDetailView: View {
     @State private var showDialog = false
     @State private var text = ""
     @State private var isLoading = false
+    @State private var showReportView = false
+    @State private var showBlackView = false
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
+                    LazyVStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 0) {
                             CustomNavigationLink {
                                 if let user = viewModel.user {
-                                    DetailView(viewModel: DetailViewModel(user: user))
+                                    NavigationLazyView(DetailView(user: user))
+                                } else {
+                                    NavigationLazyView(DetailView(user: MOCK_USER))
                                 }
                             } label: {
                                 profileImage
@@ -65,20 +70,36 @@ struct PostDetailView: View {
                     let uid = AuthViewModel.shared.currentUser?.id
                     Button("신고하기") {
                         // uid 넘겨줘서 신고페이지로 ㄱㄱ
-                        
+                        self.showReportView.toggle()
                     }
                     Button("차단하기") {
-                        
+                        self.showBlackView.toggle()
                     }
                     if post.id == (uid ?? "") {
                         Button("삭제하기", role: .destructive) {
-                            
+                            viewModel.deletePost {
+                                dismiss()
+                            }
                         }
                     }
                 }
                 
                 commentInputSection(proxy: proxy)
             }
+            .task {
+                isLoading = true
+                await viewModel.loadData()
+                isLoading = false
+            }
+            .overlay(
+                isLoading ? LoadingView() : nil
+            )
+            .overlay(
+                self.showReportView ? ReportView(uid: viewModel.user?.id ?? "", showReportView: $showReportView) : nil
+            )
+            .overlay(
+                self.showBlackView ? BlackView(uid: viewModel.user?.id ?? "", showBlackView: $showBlackView) : nil
+            )
             .onWillAppear {
                 Task { @MainActor in
                     await self.viewModel.fetchComments()
@@ -93,11 +114,12 @@ struct PostDetailView: View {
     
     private var profileImage: some View {
         VStack {
-            if !post.profileImageUrl.isEmpty {
+            let user = viewModel.user ?? MOCK_USER
+            if !user.profileImageUrl.isEmpty {
                 Color.clear
                     .aspectRatio(contentMode: .fill)
                     .overlay(
-                        KFImage(URL(string: post.profileImageUrl))
+                        KFImage(URL(string: user.profileImageUrl))
                             .resizable()
                             .scaledToFill()
                     )
@@ -105,7 +127,7 @@ struct PostDetailView: View {
                     .clipShape(Circle())
                     .contentShape(Circle())
                     .allowsHitTesting(false)
-            } else if post.gender == .man {
+            } else if user.gender == .man {
                 Image("man")
                     .resizable()
                     .scaledToFill()
@@ -234,9 +256,13 @@ struct PostDetailView: View {
     }
     
     private var commentSection: some View {
-        VStack(spacing: 0) {
+        LazyVStack(spacing: 0) {
             ForEach(viewModel.comments) { comment in
-                CommentView(comment: comment)
+                NavigationLazyView(CommentView(comment: comment, onDelete: {
+                    Task {
+                        await viewModel.refresh()
+                    }
+                }))
                     .background(comment.uid == post.uid ? ColorManager.black30 : nil)
                     .id(comment.id)
             }
@@ -281,5 +307,15 @@ struct PostDetailView: View {
 struct PostDetailView_Previews: PreviewProvider {
     static var previews: some View {
         PostDetailView(post: MOCK_POST, viewModel: PostCellViewModel(post: MOCK_POST))
+    }
+}
+
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
     }
 }

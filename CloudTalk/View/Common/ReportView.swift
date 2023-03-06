@@ -18,7 +18,7 @@ enum ReportType: String, CaseIterable {
 struct ReportView: View {
     
     @ObservedObject var viewModel = ReportViewModel()
-    let user: User
+    let uid: String
     @Binding var showReportView: Bool
     @State private var showAlert = false
     
@@ -33,7 +33,7 @@ struct ReportView: View {
                 selectCases: ReportType.allCases.compactMap({  $0.rawValue})
             ) { selectedReport in
                 // TODO: 뷰모델에서 report 하기
-                viewModel.report(user: self.user, selectedReport: selectedReport)
+                viewModel.report(uid: self.uid, selectedReport: selectedReport)
                 withAnimation {
                     showAlert.toggle()
                 }
@@ -53,6 +53,6 @@ struct ReportView: View {
 
 struct ReportView_Previews: PreviewProvider {
     static var previews: some View {
-        ReportView(user: MOCK_USER, showReportView: .constant(true))
+        ReportView(uid: "", showReportView: .constant(true))
     }
 }

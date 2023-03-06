@@ -17,6 +17,24 @@ class SendMessageViewModel: ObservableObject {
         self.user = user
     }
     
+    // MARK: - 포인트 체크, 차감
+    func checkPoint() async -> Bool {
+        guard let uid = AuthViewModel.shared.currentUser?.id else { return false }
+        
+        guard let user = try? await COLLECTION_USERS.document(uid).getDocument(as: User.self) else { return false }
+        
+        if user.point < 50 {
+            return false
+        } else {
+            try? await COLLECTION_USERS.document(uid).updateData([
+                KEY_POINT: user.point - 50
+            ])
+            AuthViewModel.shared.fetchUser()
+            return true
+        }
+    }
+    
+    // MARK: - 첫 메시지 보내기
     func setChats(text: String) async {
         guard let fromId = AuthViewModel.shared.currentUser?.id else { return }
         guard let toId = user.id else { return }

@@ -109,7 +109,6 @@ struct CustomNavigationView<Content: View>: View {
             CustomNavBarContainerView {
                 content
             }
-            .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

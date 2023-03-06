@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct StoreView: View {
+    
+    @StateObject private var viewModel = StoreViewModel()
+    
     var body: some View {
         ZStack {
             ColorManager.black50.ignoresSafeArea()
@@ -19,33 +22,33 @@ struct StoreView: View {
                 }
                 .padding(.bottom, 20)
                 Button {
-                    
+                    viewModel.buyPoint(productID: "com.jerry.point1")
                 } label: {
-                    StoreCell(point: 1000, price: 1200)
+                    StoreCell(point: 1000, price: 1500)
                 }
                 .padding(.bottom, 8)
                 Button {
-                    
+                    viewModel.buyPoint(productID: "com.jerry.point2")
                 } label: {
-                    StoreCell(point: 3300, price: 3600)
+                    StoreCell(point: 3250, price: 4400)
                 }
                 .padding(.bottom, 8)
                 Button {
-                    
+                    viewModel.buyPoint(productID: "com.jerry.point3")
                 } label: {
-                    StoreCell(point: 5750, price: 6000)
+                    StoreCell(point: 6800, price: 8800)
                 }
                 .padding(.bottom, 8)
                 Button {
-                    
+                    viewModel.buyPoint(productID: "com.jerry.point4")
                 } label: {
-                    StoreCell(point: 12000, price: 12000)
+                    StoreCell(point: 12000, price: 15000)
                 }
                 .padding(.bottom, 8)
                 Button {
-                    
+                    viewModel.buyPoint(productID: "com.jerry.point5")
                 } label: {
-                    StoreCell(point: 37500, price: 36000)
+                    StoreCell(point: 25200, price: 29000)
                 }
                 .padding(.bottom, 8)
                 
@@ -54,6 +57,9 @@ struct StoreView: View {
             .padding(.top, 24)
             .padding(.horizontal, 18)
         }
+        .onAppear {
+            viewModel.requestProducts()
+        }
         .customNavigationTitle("스토어")
         .customNavBarItems(trailing: makePoint())
     }
@@ -61,7 +67,7 @@ struct StoreView: View {
     @ViewBuilder private func makePoint() -> some View {
         HStack(spacing: 4) {
             Image("setting1")
-            Text("\(AuthViewModel.shared.currentUser?.point ?? 0)")
+            Text("\(viewModel.currentPoint)")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(ColorManager.black600)
         }

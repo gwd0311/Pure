@@ -5,7 +5,7 @@
 //  Created by hanjongwoo on 2023/02/03.
 //
 
-import Foundation
+import SwiftUI
 import Firebase
 import FirebaseFirestoreSwift
 
@@ -41,7 +41,9 @@ class PostCellViewModel: ObservableObject {
         
         guard let comments = snapShot?.documents.compactMap({ try? $0.data(as: Comment.self) }) else { return }
         DispatchQueue.main.async {
-            self.comments = comments
+            withAnimation {
+                self.comments = comments
+            }
         }
     }
     
@@ -50,7 +52,9 @@ class PostCellViewModel: ObservableObject {
         
         guard let post = try? snapShot?.data(as: Post.self) else { return }
         DispatchQueue.main.async {
-            self.post = post
+            withAnimation {
+                self.post = post
+            }
         }
     }
     
@@ -59,7 +63,26 @@ class PostCellViewModel: ObservableObject {
         
         guard let user = try? snapShot?.data(as: User.self) else { return }
         DispatchQueue.main.async {
-            self.user = user
+            withAnimation {
+                self.user = user
+            }
+        }
+    }
+    
+    func masterDelete() {
+        COLLECTION_POSTS.document(post.id ?? "").updateData([
+            KEY_POST_IMAGE_URL: "",
+            KEY_CONTENT: "정책 위반으로 삭제된 게시물입니다."
+        ])
+    }
+    
+    func deletePost(onDelete: @escaping () -> Void) {
+        COLLECTION_POSTS.document(post.id ?? "").delete() { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            onDelete()
         }
     }
     
@@ -71,6 +94,7 @@ class PostCellViewModel: ObservableObject {
     func registerComment(text: String) async {
         guard let user = AuthViewModel.shared.currentUser else { return }
         let data: [String: Any] = [
+            KEY_PID: post.id ?? "",
             KEY_UID: user.id ?? "",
             KEY_COMMENT: text,
             KEY_NICKNAME: user.nickname,

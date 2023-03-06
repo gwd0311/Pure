@@ -10,6 +10,10 @@ import SwiftUI
 struct PostView: View {
     
     @ObservedObject var viewModel = PostViewModel()
+    @EnvironmentObject private var interstitialAd: InterstitialAd
+    @State private var isLoading = false
+    @State private var showPointAlert = false
+    @State private var showWriteView = false
     
     var body: some View {
         ZStack {
@@ -35,14 +39,43 @@ struct PostView: View {
                     }
                 }
                 .refreshable {
-                    viewModel.loadPosts()
+                    await viewModel.loadPosts()
                 }
                 .cornerRadius(36, corners: .topLeft)
+                Text("")
+                    .alert(isPresented: $showPointAlert) {
+                        Alert(
+                            title: Text("알림"),
+                            message: Text("지금 게시물을 작성하면 50포인트를 받을 수 있습니다. 지금 받으러가시겠습니까?"),
+                            primaryButton: .destructive(Text("받으러 가기"), action: {
+                                self.showWriteView.toggle()
+                            }),
+                            secondaryButton: .cancel(Text("취소"))
+                        )
+                    }
+                CustomNavigationLink(
+                    destination: {
+                        WriteView()
+                    },
+                    isActive: $showWriteView,
+                    label: {
+                        Text("")
+                            .hidden()
+                    }
+                )
             }
         }
-        .onWillAppear {
-            viewModel.loadPosts()
+        .onAppear {
+            interstitialAd.showAd()
+            // TODO: Point Alert
+            if !AuthViewModel.shared.isPointReceivedToday && !AuthViewModel.shared.isPointAlertComplete {
+                self.showPointAlert.toggle()
+                AuthViewModel.shared.isPointAlertComplete = true
+            }
         }
+        .overlay(
+            isLoading ? LoadingView() : nil
+        )
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 titleLabel
@@ -61,7 +94,7 @@ struct PostView: View {
     private var titleLabel: some View {
         Text("구름게시판")
             .foregroundColor(.white)
-            .font(.gmarketSans(.bold, size: 24))
+            .font(.bmjua(.regular, size: 24))
     }
     
     private var filterButton: some View {
@@ -73,7 +106,6 @@ struct PostView: View {
                 ageRange: $viewModel.ageRange,
                 onFilter: { gender, region, ageRange in
                     viewModel.storeFilterValue(gender: gender, region: region, ageRange: ageRange)
-                    viewModel.loadPosts()
                 })
         } label: {
             Image("filter")
@@ -82,10 +114,8 @@ struct PostView: View {
     }
     
     private var writeButton: some View {
-        CustomNavigationLink {
-            WriteView(onRegister: {
-                viewModel.loadPosts()
-            })
+        Button {
+            self.showWriteView.toggle()
         } label: {
             Image("write")
         }

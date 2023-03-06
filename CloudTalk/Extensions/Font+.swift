@@ -10,6 +10,20 @@ import SwiftUI
 
 extension Font {
     
+    enum BMJUA {
+        case regular
+        case custom(String)
+        
+        var value: String {
+            switch self {
+            case .regular:
+                return "BMJUAOTF"
+            case .custom(let name):
+                return name
+            }
+        }
+    }
+    
     enum CookieRun {
         case regular
         case bold
@@ -48,6 +62,10 @@ extension Font {
                 return name
             }
         }
+    }
+    
+    static func bmjua(_ type: BMJUA, size: CGFloat = 17) -> Font {
+        return .custom(type.value, size: size)
     }
     
     static func cookieRun(_ type: CookieRun, size: CGFloat = 17) -> Font {

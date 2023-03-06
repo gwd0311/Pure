@@ -22,13 +22,19 @@ class PostViewModel: ObservableObject {
     let defaults = UserDefaults.standard
     var query: Query = COLLECTION_POSTS
     
-    func loadPosts() {
-        setFilter()
-        setQuery()
-        fetchPosts()
+    init() {
+        Task {
+            await loadPosts()
+        }
     }
     
-    private func setFilter() {
+    func loadPosts() async {
+        await setFilter()
+        await setQuery()
+        await fetchPosts()
+    }
+    
+    private func setFilter() async {
         let gender = defaults.integer(forKey: DEFAULTS_POST_GENDER)
         let region = defaults.integer(forKey: DEFAULTS_POST_REGION)
         let lowerBound = defaults.float(forKey: DEFAULTS_POST_AGERANGE_LOWERBOUND)
@@ -45,7 +51,7 @@ class PostViewModel: ObservableObject {
         }
     }
     
-    private func setQuery() {
+    private func setQuery() async {
         
         if let gender = gender, let region = region {
             query = COLLECTION_POSTS
@@ -67,26 +73,24 @@ class PostViewModel: ObservableObject {
         self.queriedPosts = self.posts.filter({ $0.age >= Int(ageRange.lowerBound) && $0.age <= Int(ageRange.upperBound) })
     }
     
-    private func fetchPosts() {
-        query
+    private func fetchPosts() async {
+        
+        let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
-            .limit(to: 7)
-            .getDocuments { snapshot, err in
-                if let err = err {
-                    print("Error:: \(err)")
-                    return
-                }
+            .limit(to: 10 + AuthViewModel.shared.blackUids.count)
+            .getDocuments()
                 
-                guard let documents = snapshot?.documents else { return }
-                                
-                let posts = documents.compactMap { try? $0.data(as: Post.self) }
-                
-                DispatchQueue.main.async {
-                    self.posts.removeAll()
-                    self.posts = posts
-                    self.setQueriedPosts()
-                }
+        guard let documents = snapshot?.documents else { return }
+                        
+        let posts = documents.compactMap { try? $0.data(as: Post.self) }
+            .filter({ !AuthViewModel.shared.blackUids.contains($0.uid) })
+        
+        DispatchQueue.main.async {
+            self.posts.removeAll()
+            self.posts = posts
+            self.setQueriedPosts()
         }
+        
     }
     
     func fetchMorePosts(post: Post) async {
@@ -95,13 +99,14 @@ class PostViewModel: ObservableObject {
         
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
-            .limit(to: 7)
+            .limit(to: 10 + AuthViewModel.shared.blackUids.count)
             .start(afterDocument: lastDoc)
             .getDocuments()
         
         guard let documents = snapshot?.documents else { return }
         
         let posts = documents.compactMap { try? $0.data(as: Post.self) }
+            .filter({ !AuthViewModel.shared.blackUids.contains($0.uid) })
         
         DispatchQueue.main.async {
             self.posts.removeAll()

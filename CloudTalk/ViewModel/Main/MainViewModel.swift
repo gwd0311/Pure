@@ -27,7 +27,7 @@ class MainViewModel: ObservableObject {
             await loadUsers()
         }
     }
-    
+        
     func loadUsers() async {
         await setFilter()
         await setQuery()
@@ -75,10 +75,9 @@ class MainViewModel: ObservableObject {
     }
     
     private func fetchUsers() async {
-        let blackUserCount = AuthViewModel.shared.blackUids.count
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
-            .limit(to: 10 + blackUserCount)
+            .limit(to: 10 + AuthViewModel.shared.blackUids.count)
             .getDocuments()
                 
         guard let documents = snapshot?.documents else { return }
@@ -97,12 +96,13 @@ class MainViewModel: ObservableObject {
     }
     
     func fetchMoreUsers(user: User) async {
+        let blackUserCount = AuthViewModel.shared.blackUids.count
         guard user.id == queriedUsers.last?.id else { return }
         guard let lastDoc = try? await COLLECTION_USERS.document(queriedUsers.last?.id ?? "").getDocument() else { return DocumentSnapshot.initialize() }
         
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
-            .limit(to: 7)
+            .limit(to: 10 + blackUserCount)
             .start(afterDocument: lastDoc)
             .getDocuments()
         

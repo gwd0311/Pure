@@ -11,6 +11,7 @@ import FirebaseFirestoreSwift
 
 struct Comment: Identifiable, Decodable {
     @DocumentID var id: String?
+    let pid: String
     let uid: String
     let comment: String
     let nickname: String
@@ -20,6 +21,7 @@ struct Comment: Identifiable, Decodable {
 }
 
 let MOCK_COMMENT = Comment(
+    pid: "JQEckXnvXfP2WwSyZ6aLROMGNEe2",
     uid: "RxuVbZB5zwakO64K5bbBoFFIuTn1",
     comment: "댓글 로드 오류",
     nickname: "닉네임 오류",

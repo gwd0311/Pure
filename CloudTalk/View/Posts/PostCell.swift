@@ -14,6 +14,7 @@ struct PostCell: View {
     let post: Post
     @ObservedObject var viewModel: PostCellViewModel
     @State private var showDialog = false
+    @State private var showAlert = false
     
     init(post: Post, showDialog: Bool = false) {
         self.post = post
@@ -22,6 +23,7 @@ struct PostCell: View {
     }
     
     var body: some View {
+        let user = viewModel.user ?? MOCK_USER
         CustomNavigationLink {
             PostDetailView(post: post, viewModel: viewModel)
         } label: {
@@ -29,11 +31,9 @@ struct PostCell: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
                         CustomNavigationLink {
-                            if let user = viewModel.user {
-                                DetailView(viewModel: DetailViewModel(user: user))
-                            }
+                            DetailView(user: user)
                         } label: {
-                            profileImage
+                            makeProfileImage(user: user)
                         }
                             .padding(.trailing, 10)
                         VStack(alignment: .leading, spacing: 2) {
@@ -55,31 +55,39 @@ struct PostCell: View {
             }
             .frame(maxWidth: .infinity)
             .background(.white)
-            .confirmationDialog("Select", isPresented: $showDialog) {
-                let uid = AuthViewModel.shared.currentUser?.id
-                Button("신고하기") {
-                    // uid 넘겨줘서 신고페이지로 ㄱㄱ
-                    
-                }
-                Button("차단하기") {
-                    
-                }
-                if post.uid == (uid ?? "") {
-                    Button("삭제하기", role: .destructive) {
-                        
-                    }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("알림"),
+                    message: Text("진짜 삭제할거임?"),
+                    primaryButton: .destructive(Text("ㅇㅇ"), action: {
+                        // TODO: 게시물 삭제 구현
+                        viewModel.masterDelete()
+                    }),
+                    secondaryButton: .cancel(Text("ㄴㄴ"))
+                )
+            }
+        }
+    }
+    
+    @ViewBuilder private func makeDeleteButton() -> some View {
+        VStack(spacing: 0) {
+            if AuthViewModel.shared.isManager {
+                Button(role: .destructive) {
+                    self.showAlert.toggle()
+                } label: {
+                    Text("삭제")
                 }
             }
         }
     }
     
-    private var profileImage: some View {
+    @ViewBuilder private func makeProfileImage(user: User) -> some View {
         VStack {
-            if !post.profileImageUrl.isEmpty {
+            if !user.profileImageUrl.isEmpty {
                 Color.clear
                     .aspectRatio(contentMode: .fill)
                     .overlay(
-                        KFImage(URL(string: post.profileImageUrl))
+                        KFImage(URL(string: user.profileImageUrl))
                             .resizable()
                             .scaledToFill()
                     )
@@ -108,15 +116,15 @@ struct PostCell: View {
     }
     
     private var profileNickname: some View {
+        
         HStack(spacing: 4) {
+            let user = viewModel.user ?? MOCK_USER
             CustomNavigationLink {
                 // 뷰모델에서 user만들어서 가져와야할듯..
-                if let user = viewModel.user {
-                    DetailView(viewModel: DetailViewModel(user: user))
-                }
+                DetailView(user: user)
             } label: {
                 Group {
-                    Text(post.nickname)
+                    Text(user.nickname)
                         .font(.system(size: 16, weight: .bold))
                     .foregroundColor(ColorManager.black600)
                     Text(post.timestamp.dateValue().timeAgoDisplay())
@@ -125,21 +133,13 @@ struct PostCell: View {
                 }
             }
             Spacer()
-            Button {
-                // 더보기 기능 구현
-                DispatchQueue.main.async {
-                    showDialog.toggle()
-                    print(showDialog)
-                }
-            } label: {
-                Image("more")
-            }
+            makeDeleteButton()
         }
     }
     private var profileDetailInfo: some View {
         CustomNavigationLink {
             if let user = viewModel.user {
-                DetailView(viewModel: DetailViewModel(user: user))
+                DetailView(user: user)
             }
         } label: {
             HStack(spacing: 2) {

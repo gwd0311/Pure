@@ -9,14 +9,17 @@ import SwiftUI
 
 struct ConversationView: View {
     
+    @EnvironmentObject var authViewModel: AuthViewModel
     @ObservedObject private var viewModel: ConversationViewModel
     @State private var text = ""
     @State private var isLoading = false
     @State private var isEditing = false
     @State private var showDialog = false
-    @Environment(\.dismiss) var dismiss
-    
+    @State private var showReportView = false
+    @State private var showBlackView = false
     @State private var newMessageID: String? = nil
+    
+    @Environment(\.dismiss) var dismiss
     
     private let chat: Chat
     
@@ -71,6 +74,12 @@ struct ConversationView: View {
                     makeExitButton()
                 }
             }
+            .overlay(
+                self.showReportView ? ReportView(uid: viewModel.partnerUid, showReportView: $showReportView) : nil
+            )
+            .overlay(
+                self.showBlackView ? BlackView(uid: viewModel.partnerUid, showBlackView: $showBlackView) : nil
+            )
             .onWillDisappear {
                 self.viewModel.read()
             }
@@ -91,10 +100,10 @@ struct ConversationView: View {
         }
         .confirmationDialog("Select", isPresented: $showDialog) {
             Button("차단하기") {
-                
+                showBlackView.toggle()
             }
             Button("신고하기") {
-                
+                showReportView.toggle()
             }
         }
     }
@@ -129,7 +138,8 @@ struct ConversationView: View {
                 .padding(.vertical, 10)
                 
                 Button {
-                    viewModel.sendMessage(text)
+                    /// 채팅 보내기
+                    viewModel.sendMessage(text, isPushOn: authViewModel.isPushOn)
                     self.text = ""
                 } label: {
                     VStack(spacing: 0) {

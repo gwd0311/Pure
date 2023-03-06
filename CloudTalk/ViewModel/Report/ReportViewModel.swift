@@ -10,14 +10,11 @@ import Firebase
 
 class ReportViewModel: ObservableObject {
     
-    func report(user: User, selectedReport: String) {
-//        let fromId: String
-//        let toId: String
-//        let reportType: String
-//        let timestamp: Timestamp
+    func report(uid: String, selectedReport: String) {
+
         let data: [String: Any] = [
             KEY_FROMID: AuthViewModel.shared.currentUser?.id ?? "",
-            KEY_TOID: user.id ?? "",
+            KEY_TOID: uid,
             KEY_REPORT_TYPE: selectedReport,
             KEY_TIMESTAMP: Timestamp(date: Date())
         ]

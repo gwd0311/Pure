@@ -19,10 +19,9 @@ class DetailViewModel: ObservableObject {
     
     init(user: User) {
         self.user = user
-        fetchHeartPressedInfo()
     }
     
-    private func fetchHeartPressedInfo() {
+    func fetchHeartPressedInfo() {
         guard let uid = AuthViewModel.shared.currentUser?.id else { return }
         COLLECTION_LIKECARDS
             .whereField(KEY_FROMID, isEqualTo: uid)
@@ -36,7 +35,9 @@ class DetailViewModel: ObservableObject {
                 guard let likeCards = snapshot?.documents.compactMap({ try? $0.data(as: LikeCard.self) }) else { return }
                 
                 if !likeCards.isEmpty {
-                    self.isHeartPressed = true
+                    DispatchQueue.main.async {
+                        self.isHeartPressed = true
+                    }
                 }
             }
     }
@@ -58,7 +59,9 @@ class DetailViewModel: ObservableObject {
                         snapshot.reference.delete()
                     })
                     
-                    self.isHeartPressed = false
+                    DispatchQueue.main.async {
+                        self.isHeartPressed = false
+                    }
                 }
         } else {
             // TODO: Heart가 눌려있지 않았다면 LikeCard를 추가하기
@@ -70,7 +73,9 @@ class DetailViewModel: ObservableObject {
             ]
             
             COLLECTION_LIKECARDS.document().setData(data) { _ in
-                self.isHeartPressed = true
+                DispatchQueue.main.async {
+                    self.isHeartPressed = true
+                }
             }
             
         }
@@ -97,4 +102,9 @@ class DetailViewModel: ObservableObject {
         }
     }
     
+    func ban() {
+        COLLECTION_BANUSERS.document(user.id ?? "").setData([
+            KEY_UID: user.id ?? ""
+        ])
+    }
 }

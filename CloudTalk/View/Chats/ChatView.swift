@@ -54,16 +54,21 @@ struct ChatView: View {
                                 }
                                 .buttonStyle(NoTransparencyButtonStyle())
                             }
+                            Spacer().frame(height: 200)
                         }
                     }
                 }
                 .cornerRadius(36, corners: .topLeft)
             }
         }
+        .overlay(
+            isLoading ? LoadingView() : nil
+        )
+        
         .task {
             self.viewModel.startListen()
             isLoading = true
-            try? await Task.sleep(nanoseconds: 0_500_000_000)
+            try? await Task.sleep(nanoseconds: 0_100_000_000)
             self.isEmpty = viewModel.chats.isEmpty
             isLoading = false
         }
@@ -80,7 +85,7 @@ struct ChatView: View {
     private var titleLabel: some View {
         Text("채팅방")
             .foregroundColor(.white)
-            .font(.gmarketSans(.bold, size: 24))
+            .font(.bmjua(.regular, size: 24))
     }
     
 }

@@ -15,6 +15,25 @@ class WriteViewModel: ObservableObject {
     
     let placeholderText = "당신을 알릴 수 있는 글을 작성해주세요.\n\nSNS 아이디 또는 개인 연락처를 노출할 경우\n글이 삭제됩니다.\n\n부적절한 사진 또는 내용 등록 시\n이용 제한 될 수 있습니다.\n\n사진은 한장만 업로드 가능하며,\n새로운 글 작성 시 기존 글은 삭제됩니다."
     
+    // TODO: viewModel에서 50포인트 올리기 + lastPointDate update하기
+    func getPoint(onGet: @escaping () -> Void) {
+        let authViewModel = AuthViewModel.shared
+        guard let user = authViewModel.currentUser else { return }
+        guard let uid = user.id else { return }
+        
+        COLLECTION_USERS.document(uid).updateData([
+            KEY_LAST_POINT_DATE: Timestamp(date: Date()),
+            KEY_POINT: FieldValue.increment(Int64(50))
+        ]) { err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            
+            onGet()
+        }
+    }
+    
     func register(image: UIImage?, text: String) async {
         let authViewModel = AuthViewModel.shared
         guard let user = authViewModel.currentUser else { return }

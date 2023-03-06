@@ -20,6 +20,8 @@ struct User: Identifiable, Decodable {
     let timestamp: Timestamp
     let blackUids: [String]
     let point: Int
+    let isPushOn: Bool
+    let lastPointDate: Timestamp
 }
 
 enum Gender: Int, CaseIterable, Codable {
@@ -102,12 +104,14 @@ enum Region: Int, CaseIterable, Codable, Identifiable {
 
 let MOCK_USER = User(
     nickname: "    ",
-    gender: .woman,
+    gender: .man,
     age: 24,
     region: .daejeon,
     introduction: "데이터를 불러오지 못했습니다.",
     profileImageUrl: "",
     timestamp: Timestamp(date: Date(timeInterval: TimeInterval(-20000), since: Date())),
     blackUids: [],
-    point: 100
+    point: 100,
+    isPushOn: true,
+    lastPointDate: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
 )

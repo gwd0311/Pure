@@ -75,7 +75,7 @@ struct LikeView: View {
             ) {
                 ForEach(likeCards) { likeCard in
                     CustomNavigationLink {
-                        DetailView(viewModel: DetailViewModel(user: likeCard.user ?? MOCK_USER))
+                        DetailView(user: likeCard.user ?? MOCK_USER)
                     } label: {
                         LikeCardView(likeCard: likeCard)
                     }

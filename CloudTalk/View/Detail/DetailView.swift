@@ -10,9 +10,14 @@ import Kingfisher
 
 struct DetailView: View {
     
-    
+    let user: User
     @ObservedObject var viewModel: DetailViewModel
-
+    
+    init(user: User) {
+        self.user = user
+        self.viewModel = DetailViewModel(user: user)
+    }
+    
     @State private var showDialog = false
     @State private var showSendMessageView = false
     @State private var showConversationView = false
@@ -20,64 +25,71 @@ struct DetailView: View {
     @State private var showBlackView = false
     
     var body: some View {
-        let user = viewModel.user
-        if let isChatting = viewModel.isChatting {
-            VStack {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading) {
-
-                        makeImageSection(user: user)
-                        makeUpperSection(user: user)
-                        makeLowerSection(user: user)
-                        
-                        Spacer()
-                    }
-                    .confirmationDialog("Select", isPresented: $showDialog, actions: {
-                        Button {
-                            // 차단하기 기능 구현
-                            showBlackView.toggle()
-                        } label: {
-                            Text("차단하기")
-                        }
-                        Button {
-                            // 신고하기 기능 구현
-                            showReportView.toggle()
-                        } label: {
-                            Text("신고하기")
-                        }
-                    })
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Menu {
-
-                            } label: {
-                                Image("more")
-                            }
-                        }
-                    }
-                    .navigationTitle(user.nickname)
-                    .navigationBarTitleDisplayMode(.inline)
+        VStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading) {
+                    
+                    makeImageSection(user: user)
+                    makeUpperSection(user: user)
+                    makeLowerSection(user: user)
+                    
+                    Spacer()
                 }
-                makeBottomSection(user: user, isChatting: isChatting)
-                makeNavLinks(user: user)
-                    .hidden()
+                .confirmationDialog("Select", isPresented: $showDialog, actions: {
+                    Button {
+                        // 차단하기 기능 구현
+                        showBlackView.toggle()
+                    } label: {
+                        Text("차단하기")
+                    }
+                    Button {
+                        // 신고하기 기능 구현
+                        showReportView.toggle()
+                    } label: {
+                        Text("신고하기")
+                    }
+                    if AuthViewModel.shared.isManager {
+                        Button(role: .destructive) {
+                            // TODO: 영구정지 기능 구현
+                            viewModel.ban()
+                        } label: {
+                            Text("영구정지")
+                        }
+
+                    }
+                })
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            
+                        } label: {
+                            Image("more")
+                        }
+                    }
+                }
+                .navigationTitle(user.nickname)
+                .navigationBarTitleDisplayMode(.inline)
             }
-            .overlay(
-                self.showReportView ? ReportView(user: user, showReportView: $showReportView) : nil
-            )
-            .overlay(
-                self.showBlackView ? BlackView(uid: user.id ?? "", showBlackView: $showBlackView) : nil
-            )
-            .padding(.bottom, 20)
-            .edgesIgnoringSafeArea(.bottom)
-            .customNavBarItems(trailing: moreButton)
-            .customNavigationTitle(user.nickname)
-        } else {
-            LoadingView()
-                .task {
-                    await self.viewModel.fetchChattingInfo()
-                }
+            makeBottomSection(user: user, isChatting: viewModel.isChatting)
+            makeNavLinks(user: user)
+                .hidden()
         }
+        .onAppear {
+            viewModel.fetchHeartPressedInfo()
+            Task {
+                await viewModel.fetchChattingInfo()
+            }
+        }
+        .overlay(
+            self.showReportView ? ReportView(uid: user.id ?? "", showReportView: $showReportView) : nil
+        )
+        .overlay(
+            self.showBlackView ? BlackView(uid: user.id ?? "", showBlackView: $showBlackView) : nil
+        )
+        .padding(.bottom, 20)
+        .edgesIgnoringSafeArea(.bottom)
+        .customNavBarItems(trailing: moreButton)
+        .customNavigationTitle(user.nickname)
     }
     
     // MARK: - NavLinks
@@ -147,7 +159,7 @@ struct DetailView: View {
                 Spacer()
                 if user.timestamp.dateValue().isNew() {
                     Image("new")
-                    .padding(.bottom)
+                        .padding(.bottom)
                 }
             }
             HStack(spacing: 4) {
@@ -185,7 +197,7 @@ struct DetailView: View {
     }
     
     // MARK: - 하단 좋아요 및 메시지 전송
-    @ViewBuilder private func makeBottomSection(user: User, isChatting: Bool) -> some View {
+    @ViewBuilder private func makeBottomSection(user: User, isChatting: Bool?) -> some View {
         HStack {
             Button {
                 // 좋아요 기능 구현
@@ -201,23 +213,33 @@ struct DetailView: View {
             .padding(.leading, 8)
             .padding(.trailing, 17)
             .disabled(user.id == AuthViewModel.shared.currentUser?.id ? true : false)
-            
-            if isChatting {
-                Button {
-                    showConversationView.toggle()
-                } label: {
-                    Text("대화방으로 이동하기")
+            if let isChatting = isChatting {
+                if isChatting {
+                    Button {
+                        showConversationView.toggle()
+                    } label: {
+                        Text("대화방으로 이동하기")
+                    }
+                    .buttonStyle(MainButtonStyle(color: ColorManager.pinkDark))
+                } else {
+                    Button {
+                        showSendMessageView.toggle()
+                    } label: {
+                        Text("메시지 전송")
+                    }
+                    .buttonStyle(MainButtonStyle(color: user.id != AuthViewModel.shared.currentUser?.id ? ColorManager.blue : ColorManager.black200))
+                    .disabled(user.id == AuthViewModel.shared.currentUser?.id ? true : false)
                 }
-                .buttonStyle(MainButtonStyle(color: ColorManager.pinkDark))
             } else {
                 Button {
-                    showSendMessageView.toggle()
+                    
                 } label: {
-                    Text("메시지 전송")
+                    Text("데이터 불러오는 중..")
                 }
-                .buttonStyle(MainButtonStyle(color: user.id != AuthViewModel.shared.currentUser?.id ? ColorManager.blue : ColorManager.black200))
-                .disabled(user.id == AuthViewModel.shared.currentUser?.id ? true : false)
+                .buttonStyle(MainButtonStyle(color: ColorManager.black200))
+                .disabled(false)
             }
+
         }
         .padding(.horizontal, 18)
         .padding(.top, 8)
@@ -238,6 +260,6 @@ struct DetailView: View {
 
 struct DetailView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailView(viewModel: DetailViewModel(user: MOCK_USER))
+        DetailView(user: MOCK_USER)
     }
 }
