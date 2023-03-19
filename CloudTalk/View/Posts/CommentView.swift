@@ -23,56 +23,57 @@ struct CommentView: View {
     }
     
     var body: some View {
-        let user = viewModel.user ?? MOCK_USER
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 0) {
-                    CustomNavigationLink {
-                        NavigationLazyView(DetailView(user: user))
-                    } label: {
-                        makeProfileImage(user: user)
-                            .padding(.trailing, 10)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        makeNickname(user: user)
-                        Text(comment.comment)
-                            .foregroundColor(ColorManager.black600)
-                            .font(.system(size: 14))
+        if let user = comment.user {
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 0) {
+                        CustomNavigationLink {
+                            DetailView(user: user)
+                        } label: {
+                            makeProfileImage(user: user)
+                                .padding(.trailing, 10)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            makeNickname(user: user)
+                            Text(comment.comment)
+                                .foregroundColor(ColorManager.black600)
+                                .font(.system(size: 14))
+                        }
                     }
                 }
-            }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 20)
-            Rectangle()
-                .frame(height: 1)
-                .foregroundColor(ColorManager.black50)
-            VStack{
-                Text("")
-                    .alert(isPresented: $showMasterDeleteAlert) {
-                        Alert(
-                            title: Text("알림"),
-                            message: Text("정말 삭제하시겠습니까?"),
-                            primaryButton: .destructive(Text("예"), action: {
-                                viewModel.masterDelete {
-                                    onDelete()
-                                }
-                            }),
-                            secondaryButton: .cancel(Text("아니오"))
-                        )
-                    }
-                Text("")
-                    .alert(isPresented: $showDeleteAlert) {
-                        Alert(
-                            title: Text("알림"),
-                            message: Text("정말 댓글을 삭제하시겠습니까?"),
-                            primaryButton: .destructive(Text("예"), action: {
-                                viewModel.delete {
-                                    onDelete()
-                                }
-                            }),
-                            secondaryButton: .cancel(Text("아니오"))
-                        )
-                    }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 20)
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(ColorManager.black50)
+                VStack{
+                    Text("")
+                        .alert(isPresented: $showMasterDeleteAlert) {
+                            Alert(
+                                title: Text("알림"),
+                                message: Text("정말 삭제하시겠습니까?"),
+                                primaryButton: .destructive(Text("예"), action: {
+                                    viewModel.masterDelete {
+                                        onDelete()
+                                    }
+                                }),
+                                secondaryButton: .cancel(Text("아니오"))
+                            )
+                        }
+                    Text("")
+                        .alert(isPresented: $showDeleteAlert) {
+                            Alert(
+                                title: Text("알림"),
+                                message: Text("정말 댓글을 삭제하시겠습니까?"),
+                                primaryButton: .destructive(Text("예"), action: {
+                                    viewModel.delete {
+                                        onDelete()
+                                    }
+                                }),
+                                secondaryButton: .cancel(Text("아니오"))
+                            )
+                        }
+                }
             }
         }
     }

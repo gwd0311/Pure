@@ -9,6 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class DetailViewModel: ObservableObject {
     
     let user: User
@@ -16,9 +17,29 @@ class DetailViewModel: ObservableObject {
     @Published var isChatting: Bool?
     @Published var isLoading = false
     @Published var chat: Chat?
+    @Published var messageCount = 0 {
+        didSet {
+            self.blurRadius = CGFloat(10.0 - (Float(messageCount) / 30.0 * 10.0))
+        }
+    }
+    @Published var blurRadius: CGFloat = 10.0
     
     init(user: User) {
         self.user = user
+        Task {
+            try? await Task.sleep(nanoseconds: 0_500_000_000)
+            await fetchChattingInfo()
+            await fetchMessagesCount()
+        }
+    }
+    
+    func fetchMessagesCount() async {
+        guard let cid = chat?.id else { return }
+        let snapshot = try? await COLLECTION_CHATS.document(cid).collection("messages").getDocuments()
+        DispatchQueue.main.async {
+            self.messageCount = snapshot?.documents.count ?? 0
+            print(self.blurRadius)
+        }
     }
     
     func fetchHeartPressedInfo() {

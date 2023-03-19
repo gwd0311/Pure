@@ -9,6 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class MainViewModel: ObservableObject {
     
     @Published var users = [User]()
@@ -27,14 +28,21 @@ class MainViewModel: ObservableObject {
             await loadUsers()
         }
     }
-        
+    
     func loadUsers() async {
-        await setFilter()
-        await setQuery()
-        await fetchUsers()
+        setFilter()
+        setQuery()
+        do {
+            let users = try await fetchUsers()
+            DispatchQueue.main.async {
+                self.queriedUsers = users
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
-    private func setFilter() async {
+    private func setFilter() {
         let gender = defaults.integer(forKey: DEFAULTS_MAIN_GENDER)
         let region = defaults.integer(forKey: DEFAULTS_MAIN_REGION)
         let lowerBound = defaults.float(forKey: DEFAULTS_MAIN_AGERANGE_LOWERBOUND)
@@ -49,10 +57,9 @@ class MainViewModel: ObservableObject {
             self.region = region != -1 ? Region(rawValue: region) : nil
             self.ageRange = lowerBound...upperBound
         }
-        print(gender, region, ageRange)
     }
     
-    private func setQuery() async {
+    private func setQuery() {
         
         if let gender = gender, let region = region {
             query = COLLECTION_USERS
@@ -70,34 +77,43 @@ class MainViewModel: ObservableObject {
         
     }
     
-    private func setQueriedUsers() {
-        self.queriedUsers = self.users.filter({ $0.age >= Int(ageRange.lowerBound) && $0.age <= Int(ageRange.upperBound) })
+    private func getQueriedUsers(users: [User]) -> [User] {
+        let lowerBound = Int(ageRange.lowerBound)
+        let upperBound = Int(ageRange.upperBound)
+        
+        /// 18 ~ 99로 세팅된 경우에는 비공개(-1)된 나이도 가져온다.
+        if lowerBound == 18 && upperBound == 99 {
+            return users.filter({ $0.age >= -1 && $0.age <= upperBound })
+        } else {
+            return users.filter({ $0.age >= lowerBound && $0.age <= upperBound })
+        }
     }
     
-    private func fetchUsers() async {
+    private func fetchUsers() async throws -> [User] {
+        print("유저 가져오기 실행")
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
             .limit(to: 10 + AuthViewModel.shared.blackUids.count)
             .getDocuments()
                 
-        guard let documents = snapshot?.documents else { return }
+        guard let documents = snapshot?.documents else { return [] }
         
         let users = documents.compactMap { try? $0.data(as: User.self) }
             .filter { $0.id != Auth.auth().currentUser?.uid }
             .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
+            .filter { $0.id != M_KEY}
 
         DispatchQueue.main.async {
             self.users.removeAll()
-            self.queriedUsers.removeAll()
-            self.users = users
-            self.setQueriedUsers()
         }
-        
+
+        return self.getQueriedUsers(users: users)
     }
     
     func fetchMoreUsers(user: User) async {
         let blackUserCount = AuthViewModel.shared.blackUids.count
         guard user.id == queriedUsers.last?.id else { return }
+        print("더 가져오기 실행")
         guard let lastDoc = try? await COLLECTION_USERS.document(queriedUsers.last?.id ?? "").getDocument() else { return DocumentSnapshot.initialize() }
         
         let snapshot = try? await query
@@ -111,23 +127,28 @@ class MainViewModel: ObservableObject {
         let users = documents.compactMap { try? $0.data(as: User.self) }
             .filter { $0.id != Auth.auth().currentUser?.uid }
             .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
+            .filter { $0.id != M_KEY}
         
         DispatchQueue.main.async {
             self.users.removeAll()
             self.users = self.queriedUsers
             self.users += users
-            self.setQueriedUsers()
+            self.queriedUsers += self.getQueriedUsers(users: users)
         }
     }
     
-    func storeFilterValue(gender: Gender?, region: Region?, ageRange: ClosedRange<Float>) {
+    func storeFilterValue(gender: Gender?, region: Region?, ageRange: ClosedRange<Float>) async {
                 
         // UserDefaults에 적용한 filter값 저장 (-1 = 전체)
         defaults.setValue(gender?.rawValue ?? -1, forKey: DEFAULTS_MAIN_GENDER)
         defaults.setValue(region?.rawValue ?? -1, forKey: DEFAULTS_MAIN_REGION)
         defaults.setValue(ageRange.lowerBound, forKey: DEFAULTS_MAIN_AGERANGE_LOWERBOUND)
         defaults.setValue(ageRange.upperBound, forKey: DEFAULTS_MAIN_AGERANGE_UPPERBOUND)
-        self.queriedUsers.removeAll()
-        self.users.removeAll()
+        
+        DispatchQueue.main.async {
+            self.queriedUsers.removeAll()
+            self.users.removeAll()
+        }
+        
     }
 }

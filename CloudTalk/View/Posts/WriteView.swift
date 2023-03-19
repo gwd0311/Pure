@@ -18,6 +18,7 @@ struct WriteView: View {
     @State private var showTextPlaceHolder = true
     @State private var photoButtonText = "사진 추가"
     @State private var showPointAlert = false
+    let onWrite: () -> Void
     
     var body: some View {
         ScrollView {
@@ -38,6 +39,7 @@ struct WriteView: View {
                                 isLoading = false
                                 AuthViewModel.shared.fetchUser()
                                 dismiss()
+                                onWrite()
                             }
                             
                         })
@@ -152,6 +154,7 @@ struct WriteView: View {
                     self.showPointAlert.toggle()
                 } else {
                     dismiss()
+                    onWrite()
                 }
             }
         } label: {
@@ -169,8 +172,8 @@ struct WriteView: View {
     }
 }
 
-struct WriteView_Previews: PreviewProvider {
-    static var previews: some View {
-        WriteView()
-    }
-}
+//struct WriteView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        WriteView()
+//    }
+//}

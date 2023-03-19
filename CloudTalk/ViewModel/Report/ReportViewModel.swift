@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 
+@MainActor
 class ReportViewModel: ObservableObject {
     
     func report(uid: String, selectedReport: String) {

@@ -66,7 +66,7 @@ struct ConfirmationModal: View {
 struct ConfirmationModal_Previews: PreviewProvider {
     static var previews: some View {
         ConfirmationModal(
-            title: "구름톡 탈퇴하기",
+            title: "퓨어 탈퇴하기",
             content: "탈퇴 시 모든 정보가 사라집니다.",
             confirmationTitle: "탈퇴하기",
             onConfirm: {},

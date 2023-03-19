@@ -10,6 +10,8 @@ import SwiftUI
 struct StoreView: View {
     
     @StateObject private var viewModel = StoreViewModel()
+    @State private var isLoading = false
+    @State private var showFailAlert = false
     
     var body: some View {
         ZStack {
@@ -57,9 +59,27 @@ struct StoreView: View {
             .padding(.top, 24)
             .padding(.horizontal, 18)
         }
+        .overlay(
+            isLoading ? LoadingView() : nil
+        )
         .onAppear {
             viewModel.requestProducts()
         }
+        .onReceive(viewModel.$isLoading, perform: { isLoading in
+            self.isLoading = isLoading
+        })
+        .onReceive(viewModel.$showFailAlert, perform: { showFailAlert in
+            self.showFailAlert = showFailAlert
+        })
+        .alert(isPresented: $showFailAlert, content: {
+            Alert(
+                title: Text("결제 실패"),
+                message: Text("결제에 실패하였습니다.\ngwd0311@naver.com로 문의바랍니다."),
+                dismissButton: .cancel(Text("확인"), action: {
+                    viewModel.showFailAlert.toggle()
+                })
+            )
+        })
         .customNavigationTitle("스토어")
         .customNavBarItems(trailing: makePoint())
     }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 enum ModalStatus {
     case none
@@ -13,6 +14,8 @@ enum ModalStatus {
     case gender
     case age
     case region
+    case job
+    case company
     case introduction
 }
 
@@ -21,59 +24,65 @@ struct ProfileEditView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     @Binding var isModalActive: Bool
     
-    @State private var image: UIImage?
+    
     @State private var showImagePicker = false
     @State private var isLoading = false
     @State private var modalStatus: ModalStatus = .none
     @State private var showNickNameModal = false
     
     /// Input Value
+    @State private var image: UIImage?
     @State private var nickName = AuthViewModel.shared.currentUser?.nickname
     @State private var gender = AuthViewModel.shared.currentUser?.gender
     @State private var region = AuthViewModel.shared.currentUser?.region
+    @State private var job = AuthViewModel.shared.currentUser?.job
+    @State private var company = AuthViewModel.shared.currentUser?.company
     @State private var age = AuthViewModel.shared.currentUser?.age
     @State private var introduction = AuthViewModel.shared.currentUser?.introduction
     
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
+        let user = viewModel.currentUser ?? MOCK_USER
         GeometryReader { geo in
-            ScrollView {
-                VStack(spacing: 0) {
-                    let user = viewModel.currentUser ?? MOCK_USER
-                    ProfileImageButton(user: user, image: $image, showImagePicker: $showImagePicker)
+            VStack {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ProfileImageButton(
+                            mode: .editMode,
+                            user: user,
+                            image: $image,
+                            gender: $gender,
+                            showImagePicker: $showImagePicker
+                        )
                         .padding(.top, 32)
                         .padding(.bottom, 32)
-                    makeInputButtons(user: user)
-                    
-                    Spacer()
-                    Button {
-                        // TODO: viewModel 수정이벤트 추가
-                        isLoading = true
-                        viewModel.updateCurrentUser(
-                            image: image,
-                            nickname: nickName ?? user.nickname,
-                            gender: gender ?? user.gender,
-                            age: age ?? user.age,
-                            region: region ?? user.region,
-                            introduction: introduction ?? user.introduction,
-                            onUpdate: {
-                                viewModel.fetchUser()
-                                isLoading = false
-                                dismiss()
-                            }
-                        )
-                    } label: {
-                        Text("완료")
+                        makeInputButtons(user: user)
+                        
+                        Spacer().frame(height: 100)
+                        
                     }
-                    .padding(.horizontal, 18)
-                    .buttonStyle(MainButtonStyle(color: ColorManager.blue))
+                    .frame(height: geo.size.height + 100)
                 }
-                .frame(height: geo.size.height)
+                makeCompleteButton(user: user)
+                    .padding(.bottom, 44)
             }
             .overlay(
                 isLoading ? LoadingView() : nil
             )
+            .onAppear {
+                if let url = URL(string: AuthViewModel.shared.currentUser?.profileImageUrl ?? "") {
+                    KingfisherManager.shared.retrieveImage(with: url) { result in
+                        switch result {
+                        case .success(let value):
+                            self.image = value.image
+                        case .failure(let error):
+                            // 오류 처리를 수행합니다.
+                            print("Error: \(error)")
+                        }
+                    }
+                }
+            }
             .onDisappear {
                 AuthViewModel.shared.fetchUser()
             }
@@ -88,8 +97,33 @@ struct ProfileEditView: View {
                 makeModal()
             )
             .customNavigationTitle("프로필 편집")
-            
         }
+    }
+    
+    @ViewBuilder private func makeCompleteButton(user: User) -> some View {
+        Button {
+            // TODO: viewModel 수정이벤트 추가
+            isLoading = true
+            viewModel.updateCurrentUser(
+                image: image,
+                nickname: nickName ?? user.nickname,
+                gender: gender ?? user.gender,
+                age: age ?? user.age,
+                region: region ?? user.region,
+                job: job ?? user.job,
+                company: company ?? user.company,
+                introduction: introduction ?? user.introduction,
+                onUpdate: {
+                    viewModel.fetchUser()
+                    isLoading = false
+                    dismiss()
+                }
+            )
+        } label: {
+            Text("완료")
+        }
+        .padding(.horizontal, 18)
+        .buttonStyle(MainButtonStyle(color: ColorManager.blue))
     }
     
     // MARK: - 모달 만들기
@@ -136,6 +170,22 @@ struct ProfileEditView: View {
                             self.introduction = introductionText
                         }
                     )
+                } else if modalStatus == .job {
+                    WheelPickerModal(
+                        modalStatus: $modalStatus,
+                        type: .job,
+                        onConfirm: { job in
+                            self.job = Job(rawValue: job)
+                        },
+                        initialInt: self.job?.rawValue ?? 0
+                    )
+                } else if modalStatus == .company {
+                    CompanyInputModal(
+                        modalStatus: $modalStatus,
+                        onConfirm: { company in
+                            self.company = company
+                        }
+                    )
                 }
             } else {
                 EmptyView()
@@ -144,24 +194,57 @@ struct ProfileEditView: View {
     }
     
     @ViewBuilder private func makeInputButtons(user: User) -> some View {
-        ProfileInputButton(title: "닉네임", content: self.nickName ?? "입력해주세요", onClick: {
-            self.modalStatus = .nickName
-        })
-        
-        ProfileInputButton(title: "성별", content: self.gender?.title ?? "입력해주세요", onClick: {
-            self.modalStatus = .gender
-        })
-        ProfileInputButton(title: "나이", content: self.age == nil ? "입력해주세요" : "\(self.age ?? 20)세", onClick: {
-            self.modalStatus = .age
-        })
-        ProfileInputButton(title: "지역", content: self.region?.title ?? "입력해주세요", onClick: {
-            self.modalStatus = .region
-        })
-        ProfileInputButton(title: "내 소개", content: self.introduction ?? "입력해주세요", onClick: {
-            self.modalStatus = .introduction
-        })
+        VStack(spacing: 0) {
+            ProfileInputButton(title: "닉네임", content: self.nickName ?? "", onClick: {
+                self.modalStatus = .nickName
+            })
+            ProfileInputButton(title: "성별", content: getGenderContent(), isOptional: true, onClick: {
+                self.modalStatus = .gender
+            })
+            ProfileInputButton(title: "나이", content: getAgeContent(), isOptional: true, onClick: {
+                self.modalStatus = .age
+            })
+            ProfileInputButton(title: "지역", content: self.region?.title ?? "", onClick: {
+                self.modalStatus = .region
+            })
+            ProfileInputButton(title: "직업", content: self.job?.title ?? "", onClick: {
+                self.modalStatus = .job
+            })
+            ProfileInputButton(title: "직장", content: getCompanyContent(), isOptional: true, onClick: {
+                self.modalStatus = .company
+            })
+            ProfileInputButton(title: "내 소개", content: self.introduction ?? "", onClick: {
+                self.modalStatus = .introduction
+            })
+        }
     }
     
+    private func getGenderContent() -> String {
+        guard let gender = self.gender else { return "" }
+        if gender == .unknown {
+            return "비공개"
+        } else {
+            return gender.title
+        }
+    }
+    
+    private func getAgeContent() -> String {
+        guard let age = self.age else { return "" }
+        if age == -1 {
+            return "비공개"
+        } else {
+            return "\(age)세"
+        }
+    }
+    
+    private func getCompanyContent() -> String {
+        guard let company = self.company else { return "" }
+        if company == "" {
+            return "비공개"
+        } else {
+            return company
+        }
+    }
 }
 
 struct ProfileEditView_Previews: PreviewProvider {

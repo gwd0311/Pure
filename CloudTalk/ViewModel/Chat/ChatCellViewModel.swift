@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class ChatCellViewModel: ObservableObject {
     
     let chat: Chat

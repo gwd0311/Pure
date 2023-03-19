@@ -152,11 +152,11 @@ struct FilterView: View {
     }
 }
 
-struct FilterView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainView()
-    }
-}
+//struct FilterView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MainView(viewModel: <#MainViewModel#>)
+//    }
+//}
 
 struct GenderSelectView: View {
     

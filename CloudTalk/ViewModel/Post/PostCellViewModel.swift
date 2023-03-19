@@ -9,6 +9,7 @@ import SwiftUI
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class PostCellViewModel: ObservableObject {
 
     var post: Post
@@ -37,13 +38,30 @@ class PostCellViewModel: ObservableObject {
     }
     
     func fetchComments() async {
-        let snapShot = try? await COLLECTION_POSTS.document(post.uid).collection("comments").order(by: KEY_TIMESTAMP, descending: false).getDocuments()
-        
-        guard let comments = snapShot?.documents.compactMap({ try? $0.data(as: Comment.self) }) else { return }
-        DispatchQueue.main.async {
-            withAnimation {
-                self.comments = comments
+        do {
+            let snapShot = try await COLLECTION_POSTS.document(post.uid).collection("comments").order(by: KEY_TIMESTAMP, descending: false).getDocuments()
+            
+            let comments = snapShot.documents.compactMap { document -> Comment? in
+                try? document.data(as: Comment.self)
             }
+            
+            var tempComments = [Comment]()
+            
+            for comment in comments {
+                if let user = try? await getUser(comment: comment) {
+                    var tempComment = comment
+                    tempComment.user = user
+                    tempComments.append(tempComment)
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.comments = tempComments
+            }
+    
+        } catch {
+            // handle error
+            print(error.localizedDescription)
         }
     }
     
@@ -67,6 +85,11 @@ class PostCellViewModel: ObservableObject {
                 self.user = user
             }
         }
+    }
+    
+    private func getUser(comment: Comment) async throws -> User {
+        let user = try? await COLLECTION_USERS.document(comment.uid).getDocument(as: User.self)
+        return user ?? MOCK_USER
     }
     
     func masterDelete() {

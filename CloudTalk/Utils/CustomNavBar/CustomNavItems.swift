@@ -29,12 +29,14 @@ struct CustomNavigationLink<Label: View, Destination: View>: View {
                 label: {
                     label
                 })
+            .isDetailLink(true)
         } else {
             NavigationLink {
                 makeContainerView()
             } label: {
                 label
             }
+            .isDetailLink(true)
         }
     }
     
@@ -58,6 +60,7 @@ struct CustomNavBarContainerView<Content: View>: View {
     let content: Content
     let isModalActive: Binding<Bool>?
     @State private var showBackButton: Bool = true
+    @State private var isHidden: Bool = false
     @State private var title: String = ""
     @State private var leading: EquatableViewContainer = EquatableViewContainer(view: AnyView(EmptyView()))
     @State private var trailing: EquatableViewContainer = EquatableViewContainer(view: AnyView(EmptyView()))

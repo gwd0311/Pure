@@ -18,41 +18,53 @@ struct RegistrationView: View {
     @State private var isModalActive = false
     @State private var showAlert = false
     
-    /// Input Values
+    /// 초기값 세팅
     @State private var nickName: String?
     @State private var gender: Gender?
     @State private var region: Region?
+    @State private var job: Job?
+    @State private var company: String?
     @State private var age: Int?
     @State private var introduction: String?
     
     var isInputComplete: Bool {
-        self.nickName != nil && self.gender != nil && region != nil && self.age != nil && self.introduction != nil
+        self.nickName != nil && self.gender != nil && region != nil && self.age != nil && self.introduction != nil && self.job != nil && self.company != nil
     }
     
     var body: some View {
         CustomNavigationView {
             GeometryReader { geo in
-                ScrollView {
-                    VStack {
-                        let user = viewModel.currentUser ?? MOCK_USER
-                        ProfileImageButton(user: user, image: $image, showImagePicker: $showImagePicker)
+                VStack {
+                    ScrollView {
+                        VStack {
+                            let user = viewModel.currentUser ?? MOCK_USER
+                            ProfileImageButton(
+                                mode: .defaultMode,
+                                user: user,
+                                image: $image,
+                                gender: $gender,
+                                showImagePicker: $showImagePicker
+                            )
                             .padding(.top, 32)
                             .padding(.bottom, 32)
-                        makeInputButtons(user: user)
-                        Spacer()
-                        makeStartButton()
-                    }
-                    .frame(height: geo.size.height)
-                    .customNavigationTitle("프로필")
-                    .customNavBarItems(leading: makeBackButton())
-                    .onChange(of: modalStatus, perform: { status in
-                        if status == .none {
-                            isModalActive = false
-                        } else {
-                            isModalActive = true
+                            makeInputButtons(user: user)
+                            Spacer().frame(height: 100)
                         }
-                    })
+                        .frame(height: geo.size.height + 100)
+                        .customNavigationTitle("프로필 등록")
+                        .customNavBarItems(leading: makeBackButton())
+                        .onChange(of: modalStatus, perform: { status in
+                            if status == .none {
+                                isModalActive = false
+                            } else {
+                                isModalActive = true
+                            }
+                        })
+                    }
+                    makeStartButton()
+                        .padding(.bottom, 24)
                 }
+                .edgesIgnoringSafeArea(.bottom)
             }
         }
         .alert("알림", isPresented: $showAlert, actions: {
@@ -70,6 +82,7 @@ struct RegistrationView: View {
     @ViewBuilder private func makeBackButton() -> some View {
         Button {
             self.viewModel.signOut()
+            self.viewModel.clearSession()
         } label: {
             Image(systemName: "chevron.backward")
         }
@@ -81,14 +94,20 @@ struct RegistrationView: View {
             ProfileInputButton(title: "닉네임", content: self.nickName ?? "", onClick: {
                 self.modalStatus = .nickName
             })
-            ProfileInputButton(title: "성별", content: self.gender?.title ?? "", onClick: {
+            ProfileInputButton(title: "성별", content: getGenderContent(), isOptional: true, onClick: {
                 self.modalStatus = .gender
             })
-            ProfileInputButton(title: "나이", content: self.age == nil ? "" : "\(self.age ?? 20)세", onClick: {
+            ProfileInputButton(title: "나이", content: getAgeContent(), isOptional: true, onClick: {
                 self.modalStatus = .age
             })
             ProfileInputButton(title: "지역", content: self.region?.title ?? "", onClick: {
                 self.modalStatus = .region
+            })
+            ProfileInputButton(title: "직업", content: self.job?.title ?? "", onClick: {
+                self.modalStatus = .job
+            })
+            ProfileInputButton(title: "직장", content: getCompanyContent(), isOptional: true, onClick: {
+                self.modalStatus = .company
             })
             ProfileInputButton(title: "내 소개", content: self.introduction ?? "", onClick: {
                 self.modalStatus = .introduction
@@ -96,6 +115,34 @@ struct RegistrationView: View {
         }
     }
     
+    private func getGenderContent() -> String {
+        guard let gender = self.gender else { return "" }
+        if gender == .unknown {
+            return "비공개"
+        } else {
+            return gender.title
+        }
+    }
+    
+    private func getAgeContent() -> String {
+        guard let age = self.age else { return "" }
+        if age == -1 {
+            return "비공개"
+        } else {
+            return "\(age)세"
+        }
+    }
+    
+    private func getCompanyContent() -> String {
+        guard let company = self.company else { return "" }
+        if company.isEmpty {
+            return "비공개"
+        } else {
+            return company
+        }
+    }
+    
+    // MARK: - 시작하기 버튼
     @ViewBuilder private func makeStartButton() -> some View {
         Button {
             // TODO: viewModel register
@@ -104,6 +151,8 @@ struct RegistrationView: View {
                let gender = gender,
                let age = age,
                let region = region,
+               let job = job,
+               let company = company,
                let introduction = introduction {
                 viewModel.setCurrentUser(
                     image: self.image,
@@ -112,6 +161,8 @@ struct RegistrationView: View {
                     age: age,
                     region: region,
                     introduction: introduction,
+                    job: job,
+                    company: company,
                     onSet: {
                         isLoading = false
                         viewModel.fetchUser()
@@ -171,6 +222,22 @@ struct RegistrationView: View {
                         modalStatus: $modalStatus,
                         onConfirm: { introductionText in
                             self.introduction = introductionText
+                        }
+                    )
+                } else if modalStatus == .job {
+                    WheelPickerModal(
+                        modalStatus: $modalStatus,
+                        type: .job,
+                        onConfirm: { job in
+                            self.job = Job(rawValue: job)
+                        },
+                        initialInt: self.job?.rawValue ?? 0
+                    )
+                } else if modalStatus == .company {
+                    CompanyInputModal(
+                        modalStatus: $modalStatus,
+                        onConfirm: { company in
+                            self.company = company
                         }
                     )
                 }

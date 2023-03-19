@@ -12,63 +12,75 @@ import Kingfisher
 struct PostCell: View {
     
     let post: Post
+    let onDelete: () -> Void
     @ObservedObject var viewModel: PostCellViewModel
     @State private var showDialog = false
     @State private var showAlert = false
     
-    init(post: Post, showDialog: Bool = false) {
+    init(post: Post, showDialog: Bool = false, onDelete: @escaping () -> Void) {
         self.post = post
         self.viewModel = PostCellViewModel(post: post)
         self.showDialog = showDialog
+        self.onDelete = onDelete
     }
     
     var body: some View {
-        let user = viewModel.user ?? MOCK_USER
-        CustomNavigationLink {
-            PostDetailView(post: post, viewModel: viewModel)
-        } label: {
-            VStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 0) {
-                        CustomNavigationLink {
-                            DetailView(user: user)
-                        } label: {
-                            makeProfileImage(user: user)
+        VStack {
+            if let user = post.user {
+                CustomNavigationLink {
+                    PostDetailView(
+                        post: post,
+                        viewModel: viewModel,
+                        onDelete: {
+                            onDelete()
                         }
-                            .padding(.trailing, 10)
-                        VStack(alignment: .leading, spacing: 2) {
-                            profileNickname
-                            profileDetailInfo
+                    )
+                } label: {
+                    VStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(spacing: 0) {
+                                CustomNavigationLink {
+                                    DetailView(user: user)
+                                } label: {
+                                    makeProfileImage(user: user)
+                                }
+                                    .padding(.trailing, 10)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    makeProfileNickname(user: user)
+                                    makeProfileDetailInfo(user: user)
+                                }
+                            }
+                            .padding(.bottom, 12)
+                            content
+                            postImage
+                            heartsAndComments
                         }
-                    }
-                    .padding(.bottom, 12)
-                    content
-                    postImage
-                    heartsAndComments
-                }
 
-                .padding(.vertical, 24)
-                .padding(.horizontal, 18)
-                Rectangle()
-                    .foregroundColor(ColorManager.black50)
-                    .frame(height: 8)
-            }
-            .frame(maxWidth: .infinity)
-            .background(.white)
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("알림"),
-                    message: Text("진짜 삭제할거임?"),
-                    primaryButton: .destructive(Text("ㅇㅇ"), action: {
-                        // TODO: 게시물 삭제 구현
-                        viewModel.masterDelete()
-                    }),
-                    secondaryButton: .cancel(Text("ㄴㄴ"))
-                )
+                        .padding(.vertical, 24)
+                        .padding(.horizontal, 18)
+                        Rectangle()
+                            .foregroundColor(ColorManager.black50)
+                            .frame(height: 8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .background(.white)
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("알림"),
+                            message: Text("진짜 삭제할거임?"),
+                            primaryButton: .destructive(Text("ㅇㅇ"), action: {
+                                // TODO: 게시물 삭제 구현
+                                viewModel.masterDelete()
+                            }),
+                            secondaryButton: .cancel(Text("ㄴㄴ"))
+                        )
+                    }
+                }
             }
         }
     }
     
+    // MARK: - 삭제 버튼
     @ViewBuilder private func makeDeleteButton() -> some View {
         VStack(spacing: 0) {
             if AuthViewModel.shared.isManager {
@@ -81,6 +93,7 @@ struct PostCell: View {
         }
     }
     
+    // MARK: - 프로필 이미지
     @ViewBuilder private func makeProfileImage(user: User) -> some View {
         VStack {
             if !user.profileImageUrl.isEmpty {
@@ -115,12 +128,10 @@ struct PostCell: View {
         }
     }
     
-    private var profileNickname: some View {
-        
+    // MARK: - 프로필 닉네임
+    @ViewBuilder private func makeProfileNickname(user: User) -> some View {
         HStack(spacing: 4) {
-            let user = viewModel.user ?? MOCK_USER
             CustomNavigationLink {
-                // 뷰모델에서 user만들어서 가져와야할듯..
                 DetailView(user: user)
             } label: {
                 Group {
@@ -136,31 +147,23 @@ struct PostCell: View {
             makeDeleteButton()
         }
     }
-    private var profileDetailInfo: some View {
+    
+    // MARK: - 프로필 상세정보
+    @ViewBuilder private func makeProfileDetailInfo(user: User) -> some View {
         CustomNavigationLink {
-            if let user = viewModel.user {
-                DetailView(user: user)
-            }
+            DetailView(user: user)
         } label: {
-            HStack(spacing: 2) {
-                Text(post.gender.title)
-                    .foregroundColor(post.gender == .man ? ColorManager.blue : ColorManager.pink)
-                    .font(.system(size: 12))
-                Group {
-                    Text("·")
-                    Text("\(post.age)살")
-                    Text("·")
-                    Text(post.region.title)
-                }
-                .foregroundColor(ColorManager.black400)
-                .font(.system(size: 12))
-                Spacer()
-            }
+            PersonalInfoView(
+                gender: post.gender,
+                age: post.age,
+                region: post.region,
+                fontSize: 12,
+                spacing: 2
+            )
         }
-
-
     }
     
+    // MARK: - Post 내용
     private var content: some View {
         Text(post.content)
             .multilineTextAlignment(.leading)
@@ -168,6 +171,7 @@ struct PostCell: View {
             .padding(.bottom, 14)
     }
     
+    // MARK: - Post 이미지
     private var postImage: some View {
         VStack {
             if !post.postImageUrl.isEmpty {
@@ -188,6 +192,7 @@ struct PostCell: View {
         .padding(.bottom, 14)
     }
     
+    // MARK: - 하트와 댓글
     private var heartsAndComments: some View {
         VStack(spacing: 0) {
             HStack(spacing: 4) {
@@ -212,6 +217,7 @@ struct PostCell: View {
         }
     }
     
+    // MARK: - 빈 하트버튼
     private var emptyHeartButton: some View {
         Button {
             // 빈 하트 클릭
@@ -223,6 +229,7 @@ struct PostCell: View {
         }
     }
     
+    // MARK: - 꽉찬 하트버튼
     private var compactedHeartButton: some View {
         Button {
             // 꽉찬 하트 클릭
@@ -236,8 +243,8 @@ struct PostCell: View {
     
 }
 
-struct PostCell_Previews: PreviewProvider {
-    static var previews: some View {
-        PostCell(post: MOCK_POST)
-    }
-}
+//struct PostCell_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PostCell(user: <#User#>, post: MOCK_POST)
+//    }
+//}

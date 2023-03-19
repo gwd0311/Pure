@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 
+@MainActor
 class SendMessageViewModel: ObservableObject {
     
     

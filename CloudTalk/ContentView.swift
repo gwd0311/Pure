@@ -34,20 +34,7 @@ struct ContentView: View {
             } else {
                 Group {
                     if viewModel.userSession != nil && viewModel.currentUser != nil {
-                        if #available(iOS 16.0, *) {
-                            NavigationStack {
-                                MainTabView()
-                            }
-                            .navigationViewStyle(StackNavigationViewStyle())
-                            .tint(.black)
-                        }
-                        else {
-                            NavigationView {
-                                MainTabView()
-                            }
-                            .navigationViewStyle(StackNavigationViewStyle())
-                            .tint(.black)
-                        }
+                        MainTabView()
                     } else if viewModel.userSession != nil {
                         RegistrationView()
                     } else {

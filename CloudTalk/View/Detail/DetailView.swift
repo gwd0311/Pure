@@ -11,10 +11,12 @@ import Kingfisher
 struct DetailView: View {
     
     let user: User
+    let ableToNavigate: Bool
     @ObservedObject var viewModel: DetailViewModel
     
-    init(user: User) {
+    init(user: User, ableToNavigate: Bool = true) {
         self.user = user
+        self.ableToNavigate = ableToNavigate
         self.viewModel = DetailViewModel(user: user)
     }
     
@@ -55,7 +57,6 @@ struct DetailView: View {
                         } label: {
                             Text("영구정지")
                         }
-
                     }
                 })
                 .toolbar {
@@ -70,7 +71,9 @@ struct DetailView: View {
                 .navigationTitle(user.nickname)
                 .navigationBarTitleDisplayMode(.inline)
             }
-            makeBottomSection(user: user, isChatting: viewModel.isChatting)
+            if ableToNavigate {
+                makeBottomSection(user: user, isChatting: viewModel.isChatting)
+            }
             makeNavLinks(user: user)
                 .hidden()
         }
@@ -78,6 +81,7 @@ struct DetailView: View {
             viewModel.fetchHeartPressedInfo()
             Task {
                 await viewModel.fetchChattingInfo()
+                await viewModel.fetchMessagesCount()
             }
         }
         .overlay(
@@ -162,20 +166,27 @@ struct DetailView: View {
                         .padding(.bottom)
                 }
             }
-            HStack(spacing: 4) {
-                Text(user.gender == .man ? "남자" : "여자")
-                    .foregroundColor(user.gender == .man ? ColorManager.blue : ColorManager.pink)
-                    .font(.system(size: 14))
-                Group {
-                    Text("·")
-                    Text("\(user.age)살")
-                    Text("·")
-                    Text(user.region.title)
+            PersonalInfoView(
+                gender: user.gender,
+                age: user.age,
+                region: user.region,
+                fontSize: 14
+            )
+            .padding(.bottom, 20)
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    Text("직업")
+                    Spacer()
+                    Text("\(user.job.title) / \(user.company)")
+                        .font(.system(size: 18, weight: .black))
+                        .foregroundColor(ColorManager.blue)
+                        .blur(radius: viewModel.blurRadius)
                 }
-                .foregroundColor(ColorManager.black400)
-                .font(.system(size: 14))
-                Spacer()
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
             }
+            .background(ColorManager.black50)
+            .cornerRadius(18)
             .padding(.bottom, 20)
             Divider()
         }
@@ -258,8 +269,8 @@ struct DetailView: View {
     
 }
 
-struct DetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        DetailView(user: MOCK_USER)
-    }
-}
+//struct DetailView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        DetailView(uid: MOCK_USER)
+//    }
+//}

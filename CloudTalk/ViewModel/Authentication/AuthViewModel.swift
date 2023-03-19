@@ -52,7 +52,7 @@ class AuthViewModel: NSObject, ObservableObject {
     // MARK: - 운영자 여부
     var isManager: Bool {
         if let uid = self.currentUser?.id {
-            return uid == "hzXN4S3BynXeOGzKa2N2ccekRPi2"
+            return uid == M_KEY
         } else {
             return false
         }
@@ -112,8 +112,6 @@ class AuthViewModel: NSObject, ObservableObject {
                         KEY_USER_NICKNAMES: nicknames
                     ])
                 }
-                
-                
                 
             })
         }
@@ -184,6 +182,8 @@ class AuthViewModel: NSObject, ObservableObject {
         age: Int,
         region: Region,
         introduction: String,
+        job: Job,
+        company: String,
         onSet: @escaping () -> Void
     ) {
         guard let uid = self.userSession?.uid else { return }
@@ -195,12 +195,15 @@ class AuthViewModel: NSObject, ObservableObject {
                     KEY_AGE: age,
                     KEY_REGION: region.rawValue,
                     KEY_INTRODUCTION: introduction,
+                    KEY_JOB: job.rawValue,
+                    KEY_COMPANY: company,
                     KEY_PROFILE_IMAGE_URL: imgUrl,
                     KEY_TIMESTAMP: Timestamp(date: Date()),
                     KEY_BLACK_UIDS: [],
                     KEY_POINT: 100,
                     KEY_IS_PUSH_ON: true,
-                    KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
+                    KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date())),
+                    KEY_LAST_VISIT_DATE: Timestamp(date: Date())
                 ]
                 COLLECTION_USERS.document(uid).setData(data) { err in
                     if let err = err {
@@ -217,12 +220,15 @@ class AuthViewModel: NSObject, ObservableObject {
                 KEY_AGE: age,
                 KEY_REGION: region.rawValue,
                 KEY_INTRODUCTION: introduction,
+                KEY_JOB: job.rawValue,
+                KEY_COMPANY: company,
                 KEY_PROFILE_IMAGE_URL: "",
                 KEY_TIMESTAMP: Timestamp(date: Date()),
                 KEY_BLACK_UIDS: [],
                 KEY_POINT: 100,
                 KEY_IS_PUSH_ON: true,
-                KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
+                KEY_LAST_POINT_DATE: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date())),
+                KEY_LAST_VISIT_DATE: Timestamp(date: Date())
             ]
             COLLECTION_USERS.document(uid).setData(data) { err in
                 if let err = err {
@@ -241,21 +247,13 @@ class AuthViewModel: NSObject, ObservableObject {
         gender: Gender,
         age: Int,
         region: Region,
+        job: Job,
+        company: String,
         introduction: String,
         onUpdate: @escaping () -> Void
     ) {
         guard let uid = self.currentUser?.id else { return }
         if let image = image {
-            if let profileUrl = currentUser?.profileImageUrl {
-                if !profileUrl.isEmpty {
-                    let ref = Storage.storage().reference(forURL: profileUrl)
-                    ref.delete { err in
-                        if let err = err {
-                            print(err.localizedDescription)
-                        }
-                    }
-                }
-            }
             ImageUploader.uploadImage(image: image) { imgUrl in
                 let data: [String: Any] = [
                     KEY_PROFILE_IMAGE_URL: imgUrl,
@@ -263,7 +261,9 @@ class AuthViewModel: NSObject, ObservableObject {
                     KEY_GENDER: gender.rawValue,
                     KEY_AGE: age,
                     KEY_REGION: region.rawValue,
-                    KEY_INTRODUCTION: introduction
+                    KEY_INTRODUCTION: introduction,
+                    KEY_JOB: job.rawValue,
+                    KEY_COMPANY: company
                 ]
                 COLLECTION_USERS.document(uid).updateData(data) { err in
                     if let err = err {
@@ -276,12 +276,26 @@ class AuthViewModel: NSObject, ObservableObject {
             }
             
         } else {
+            if let urlString = AuthViewModel.shared.currentUser?.profileImageUrl {
+                if !urlString.isEmpty {
+                    let ref = Storage.storage().reference(forURL: urlString)
+                    ref.delete { err in
+                        if let err = err {
+                            print(err.localizedDescription)
+                        }
+                    }
+                }
+            }
+            
             let data: [String: Any] = [
+                KEY_PROFILE_IMAGE_URL: "",
                 KEY_NICKNAME: nickname,
                 KEY_GENDER: gender.rawValue,
                 KEY_AGE: age,
                 KEY_REGION: region.rawValue,
-                KEY_INTRODUCTION: introduction
+                KEY_INTRODUCTION: introduction,
+                KEY_JOB: job.rawValue,
+                KEY_COMPANY: company
             ]
             COLLECTION_USERS.document(uid).updateData(data) { err in
                 if let err = err {

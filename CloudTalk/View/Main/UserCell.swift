@@ -39,18 +39,12 @@ struct UserCell: View {
                 }
             }
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 4) {
-                    Text(user.gender.title)
-                        .foregroundColor(user.gender == .man ? ColorManager.blue : ColorManager.pink)
-                        .font(.system(size: 13))
-                    Group {
-                        Text("·")
-                        Text("\(user.age)살")
-                        Text("·")
-                        Text(user.region.title)
-                    }
-                    .foregroundColor(ColorManager.black400)
-                    .font(.system(size: 13))
+                HStack(spacing: 0) {
+                    PersonalInfoView(
+                        gender: self.user.gender,
+                        age: self.user.age,
+                        region: self.user.region
+                    )
                     Spacer()
                     if user.timestamp.dateValue().isNew() {
                         Image("new")

@@ -9,9 +9,11 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class ChatViewModel: ObservableObject {
     
     @Published var chats = [Chat]()
+    @Published var selectedChatId: String = ""
     
     private var listener: ListenerRegistration?
     

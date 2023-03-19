@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
+import SwiftUI
 
 struct User: Identifiable, Decodable {
     @DocumentID var id: String?
@@ -15,6 +16,8 @@ struct User: Identifiable, Decodable {
     let gender: Gender
     let age: Int
     let region: Region
+    let job: Job
+    let company: String
     let introduction: String
     let profileImageUrl: String
     let timestamp: Timestamp
@@ -22,11 +25,13 @@ struct User: Identifiable, Decodable {
     let point: Int
     let isPushOn: Bool
     let lastPointDate: Timestamp
+    let lastVisitDate: Timestamp
 }
 
 enum Gender: Int, CaseIterable, Codable {
     case man
     case woman
+    case unknown
     
     var title: String {
         switch self {
@@ -34,6 +39,19 @@ enum Gender: Int, CaseIterable, Codable {
             return "남자"
         case .woman:
             return "여자"
+        case .unknown:
+            return "비공개"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .man:
+            return ColorManager.blue
+        case .woman:
+            return ColorManager.pink
+        case .unknown:
+            return ColorManager.black400
         }
     }
 }
@@ -102,16 +120,76 @@ enum Region: Int, CaseIterable, Codable, Identifiable {
     }
 }
 
+enum Job: Int, CaseIterable, Codable, Identifiable {
+    
+    case student
+    case jobSeeker
+    case employee
+    case selfEmployment
+    case researcher
+    case freelancer
+    case businessman
+    case specializedJob
+    case medicalProfession
+    case educationalPosition
+    case techinicalPost
+    case financialPosition
+    case civilServant
+    case soldier
+    case etc
+    
+    var id: Self { self }
+    
+    var title: String {
+        switch self {
+        case .student:
+            return "학생"
+        case .jobSeeker:
+            return "취준생"
+        case .employee:
+            return "회사원"
+        case .selfEmployment:
+            return "자영업"
+        case .researcher:
+            return "연구원"
+        case .freelancer:
+            return "프리랜서"
+        case .businessman:
+            return "사업가"
+        case .specializedJob:
+            return "전문직"
+        case .medicalProfession:
+            return "의료직"
+        case .educationalPosition:
+            return "교육직"
+        case .techinicalPost:
+            return "기술직"
+        case .financialPosition:
+            return "금융직"
+        case .civilServant:
+            return "공무원"
+        case .soldier:
+            return "군인"
+        case .etc:
+            return "기타"
+        }
+    }
+}
+
 let MOCK_USER = User(
-    nickname: "    ",
+    id: "asdf",
+    nickname: "삭제된계정",
     gender: .man,
     age: 24,
     region: .daejeon,
+    job: .student,
+    company: "",
     introduction: "데이터를 불러오지 못했습니다.",
     profileImageUrl: "",
     timestamp: Timestamp(date: Date(timeInterval: TimeInterval(-20000), since: Date())),
     blackUids: [],
     point: 100,
     isPushOn: true,
-    lastPointDate: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
+    lastPointDate: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date())),
+    lastVisitDate: Timestamp(date: Date(timeInterval: TimeInterval(-3600), since: Date()))
 )

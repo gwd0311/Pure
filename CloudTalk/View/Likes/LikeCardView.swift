@@ -9,12 +9,10 @@ import SwiftUI
 
 struct LikeCardView: View {
     
-    let likeCard: LikeCard
+    let user: User
     
     var body: some View {
-        
-        let user = likeCard.user ?? MOCK_USER
-        
+                
         VStack {
             VStack(alignment: .center, spacing: 0) {
                 ProfileImageView(
@@ -29,21 +27,15 @@ struct LikeCardView: View {
                     .foregroundColor(.black)
                     .font(.system(size: 16, weight: .semibold))
                     .padding(.bottom, 4)
-                HStack(spacing: 2) {
-                    Text(user.gender.title)
-                        .foregroundColor(user.gender == .man ? ColorManager.blue : ColorManager.pink)
-                        .font(.system(size: 13))
-                    Group {
-                        Text("·")
-                        Text("\(user.age)살")
-                        Text("·")
-                        Text(user.region.title)
-                    }
-                    .foregroundColor(ColorManager.black400)
-                    .font(.system(size: 13))
-                }
+                PersonalInfoView(
+                    gender: user.gender,
+                    age: user.age,
+                    region: user.region,
+                    fontSize: 13,
+                    spacing: 2
+                )
             }
-            .padding(.horizontal, 35)
+            .padding(.horizontal, 30)
             .padding(.vertical, 20)
         }
         .overlay(
@@ -54,8 +46,8 @@ struct LikeCardView: View {
     }
 }
 
-struct LikeCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        LikeCardView(likeCard: MOCK_LIKECARD)
-    }
-}
+//struct LikeCardView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LikeCardView(likeCard: MOCK_LIKECARD)
+//    }
+//}

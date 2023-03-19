@@ -18,6 +18,7 @@ struct Comment: Identifiable, Decodable {
     let gender: Gender
     let profileImageUrl: String
     let timestamp: Timestamp
+    var user: User?
 }
 
 let MOCK_COMMENT = Comment(

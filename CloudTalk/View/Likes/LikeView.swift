@@ -9,12 +9,11 @@ import SwiftUI
 
 struct LikeView: View {
     
-    @ObservedObject var viewModel = LikeViewModel()
+    @ObservedObject var viewModel: LikeViewModel
     
     @State private var selectedTab = 0
-    @State private var isLoading = true
+    @State private var isLoading = false
     var body: some View {
-        
         VStack(spacing: 0) {
             
             navigationSection
@@ -31,11 +30,7 @@ struct LikeView: View {
         .overlay(
             isLoading ? LoadingView() : nil
         )
-        .task {
-            isLoading = true
-            try? await Task.sleep(nanoseconds: 0_200_000_000)
-            isLoading = false
-        }
+        
     }
     
     @ViewBuilder private func makeMyLikesSection() -> some View {
@@ -74,10 +69,12 @@ struct LikeView: View {
                 spacing: 18
             ) {
                 ForEach(likeCards) { likeCard in
-                    CustomNavigationLink {
-                        DetailView(user: likeCard.user ?? MOCK_USER)
-                    } label: {
-                        LikeCardView(likeCard: likeCard)
+                    if let user = likeCard.user {
+                        CustomNavigationLink {
+                            DetailView(user: user)
+                        } label: {
+                            LikeCardView(user: user)
+                        }
                     }
                 }
             }
@@ -139,8 +136,8 @@ struct LikeView: View {
     }
 }
 
-struct LikeView_Previews: PreviewProvider {
-    static var previews: some View {
-        LikeView()
-    }
-}
+//struct LikeView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LikeView()
+//    }
+//}

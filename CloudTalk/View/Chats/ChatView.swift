@@ -16,11 +16,20 @@ struct ChatView: View {
     var body: some View {
         ZStack {
             ColorManager.backgroundColor.ignoresSafeArea()
-            Rectangle()
-                .foregroundColor(.white)
-                .cornerRadius(36, corners: .topLeft)
-                .edgesIgnoringSafeArea(.bottom)
-                .padding(.top, 5)
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    titleLabel
+                    Spacer()
+                }
+                .frame(height: 52)
+                .padding(.horizontal, 16)
+                Rectangle()
+                    .foregroundColor(.white)
+                    .cornerRadius(36, corners: .topLeft)
+                    .edgesIgnoringSafeArea(.bottom)
+                    .padding(.top, 5)
+            }
+            
             if isEmpty && !isLoading {
                 VStack(spacing: 0) {
                     Image("cloud_sad")
@@ -31,28 +40,12 @@ struct ChatView: View {
                 }
             }
             VStack(spacing: 0) {
-                Spacer().frame(height: 5)
+                Spacer().frame(height: 57)
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         LazyVStack(spacing: 0) {
                             ForEach(viewModel.chats) { chat in
-                                CustomNavigationLink {
-                                    // 뷰모델에서 user가져오기
-                                    ConversationView(chat: chat)
-                                        .id(chat.id)
-                                } label: {
-                                    ChatCell(chat: chat, onDelete: { chat in
-                                        // 뷰모델에서 삭제 구현
-                                        viewModel.delete(chat: chat)
-                                    })
-                                        .id(chat.id)
-                                        .task {
-                                            if viewModel.chats.count > 8 {
-                                                await viewModel.fetchMore(chat: chat)
-                                            }
-                                        }
-                                }
-                                .buttonStyle(NoTransparencyButtonStyle())
+                                showConversationView(chat: chat)
                             }
                             Spacer().frame(height: 200)
                         }
@@ -64,7 +57,6 @@ struct ChatView: View {
         .overlay(
             isLoading ? LoadingView() : nil
         )
-        
         .task {
             self.viewModel.startListen()
             isLoading = true
@@ -75,11 +67,26 @@ struct ChatView: View {
         .onDisappear {
             self.viewModel.stopListen()
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                titleLabel
+    }
+    
+    private func showConversationView(chat: Chat) -> some View {
+        CustomNavigationLink {
+            NavigationView {
+                ConversationView(chat: chat)
+                    .id(chat.id)
+            }
+        } label: {
+            ChatCell(chat: chat, onDelete: { chat in
+                viewModel.delete(chat: chat)
+            })
+            .id(chat.id)
+            .task {
+                if viewModel.chats.count > 8 {
+                    await viewModel.fetchMore(chat: chat)
+                }
             }
         }
+        .buttonStyle(NoTransparencyButtonStyle())
     }
     
     private var titleLabel: some View {

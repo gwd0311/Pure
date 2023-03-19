@@ -11,6 +11,7 @@ enum ItemType {
     case gender
     case age
     case region
+    case job
     
     var title: String {
         switch self {
@@ -20,6 +21,8 @@ enum ItemType {
             return "나이 입력"
         case .region:
             return "지역 입력"
+        case .job:
+            return "직업 입력"
         }
     }
 }
@@ -86,6 +89,7 @@ struct WheelPickerModal: View {
             .pickerStyle(.wheel)
         } else if type == .age {
             Picker(selection: $selectedInt, label: Text("Age")) {
+                Text("비공개").tag(-1)
                 ForEach((18...99), id:\.self) { age in
                     Text(age.description).tag(age)
                 }
@@ -95,6 +99,13 @@ struct WheelPickerModal: View {
             Picker(selection: $selectedInt, label: Text("Region")) {
                 ForEach(Region.allCases, id:\.self) { region in
                     Text(region.title).tag(region.rawValue)
+                }
+            }
+            .pickerStyle(.wheel)
+        } else if type == .job {
+            Picker(selection: $selectedInt, label: Text("Job")) {
+                ForEach(Job.allCases, id:\.self) { job in
+                    Text(job.title).tag(job.rawValue)
                 }
             }
             .pickerStyle(.wheel)

@@ -21,6 +21,7 @@ struct Post: Identifiable, Decodable {
     let profileImageUrl: String
     let postImageUrl: String
     let timestamp: Timestamp
+    var user: User?
 }
 
 let MOCK_POST = Post(

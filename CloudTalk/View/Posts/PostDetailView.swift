@@ -12,6 +12,7 @@ struct PostDetailView: View {
     
     let post: Post
     @ObservedObject var viewModel: PostCellViewModel
+    let onDelete: () -> Void
     @State private var showDialog = false
     @State private var text = ""
     @State private var isLoading = false
@@ -29,7 +30,7 @@ struct PostDetailView: View {
                                 if let user = viewModel.user {
                                     NavigationLazyView(DetailView(user: user))
                                 } else {
-                                    NavigationLazyView(DetailView(user: MOCK_USER))
+                                    ProgressView()
                                 }
                             } label: {
                                 profileImage
@@ -78,18 +79,19 @@ struct PostDetailView: View {
                     if post.id == (uid ?? "") {
                         Button("삭제하기", role: .destructive) {
                             viewModel.deletePost {
+                                onDelete()
                                 dismiss()
                             }
                         }
                     }
                 }
                 
-                commentInputSection(proxy: proxy)
-            }
-            .task {
-                isLoading = true
-                await viewModel.loadData()
-                isLoading = false
+                CommentInputView(
+                    proxy: proxy,
+                    viewModel: viewModel,
+                    isLoading: $isLoading,
+                    text: $text
+                )
             }
             .overlay(
                 isLoading ? LoadingView() : nil
@@ -100,11 +102,6 @@ struct PostDetailView: View {
             .overlay(
                 self.showBlackView ? BlackView(uid: viewModel.user?.id ?? "", showBlackView: $showBlackView) : nil
             )
-            .onWillAppear {
-                Task { @MainActor in
-                    await self.viewModel.fetchComments()
-                }
-            }
             .overlay(
                 isLoading ? LoadingView() : nil
             )
@@ -258,18 +255,44 @@ struct PostDetailView: View {
     private var commentSection: some View {
         LazyVStack(spacing: 0) {
             ForEach(viewModel.comments) { comment in
-                NavigationLazyView(CommentView(comment: comment, onDelete: {
+                CommentView(comment: comment, onDelete: {
                     Task {
                         await viewModel.refresh()
                     }
-                }))
-                    .background(comment.uid == post.uid ? ColorManager.black30 : nil)
-                    .id(comment.id)
+                })
+                .background(comment.uid == post.uid ? ColorManager.black30 : nil)
+                .id(comment.id)
             }
         }
     }
     
-    @ViewBuilder private func commentInputSection(proxy: ScrollViewProxy) -> some View {
+}
+
+
+//struct PostDetailView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PostDetailView(post: MOCK_POST, viewModel: PostCellViewModel(post: MOCK_POST))
+//    }
+//}
+
+struct NavigationLazyView<Content: View>: View {
+    let build: () -> Content
+    init(_ build: @autoclosure @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
+
+struct CommentInputView: View {
+    
+    let proxy: ScrollViewProxy
+    @ObservedObject var viewModel: PostCellViewModel
+    @Binding var isLoading: Bool
+    @Binding var text: String
+    
+    var body: some View {
         VStack(spacing: 0) {
             Rectangle()
                 .foregroundColor(ColorManager.black50)
@@ -299,23 +322,5 @@ struct PostDetailView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-    }
-    
-}
-
-
-struct PostDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        PostDetailView(post: MOCK_POST, viewModel: PostCellViewModel(post: MOCK_POST))
-    }
-}
-
-struct NavigationLazyView<Content: View>: View {
-    let build: () -> Content
-    init(_ build: @autoclosure @escaping () -> Content) {
-        self.build = build
-    }
-    var body: Content {
-        build()
     }
 }

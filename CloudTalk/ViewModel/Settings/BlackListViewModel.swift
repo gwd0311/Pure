@@ -21,7 +21,7 @@ class BlackListViewModel: ObservableObject {
         
         self.blackUsers.removeAll()
         
-        let uids = AuthViewModel.shared.blackUids
+        let uids = await AuthViewModel.shared.blackUids
         
         for uid in uids {
             let snapshot = try? await COLLECTION_USERS.document(uid).getDocument()

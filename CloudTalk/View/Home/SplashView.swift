@@ -23,9 +23,11 @@ struct SplashView: View {
             } else {
                 ProgressView()
             }
-            
-            Image("cloudtalk")
-                .padding(.top, 200)
+            VStack(spacing: 0) {
+                Spacer()
+                Image("textlogo")
+                    .padding(.bottom, 50)
+            }
         }
         .onAppear {
             self.showGif = true

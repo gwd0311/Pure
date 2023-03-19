@@ -9,6 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class ConversationViewModel: ObservableObject {
     
     var chat: Chat
@@ -16,11 +17,13 @@ class ConversationViewModel: ObservableObject {
     @Published var messages = [Message]()
     var shouldListen = true
     var lastMessageTime: Date?
+    @Published var partnerUser: User?
     
     private var listener: ListenerRegistration?
     
     init(chat: Chat) {
         self.chat = chat
+        fetchPartnerUser()
     }
     
     var currentUid: String {
@@ -66,7 +69,23 @@ class ConversationViewModel: ObservableObject {
     var partnerProfileImageUrl: String {
         chat.userProfileImages[partnerUid] ?? ""
     }
-        
+    
+    // MARK: - 채팅방에서 DetailView를 보여주기 위한 partnerUser 가져오기
+    func fetchPartnerUser() {
+        guard let partnerUid = chat.uids.filter({ $0 != AuthViewModel.shared.currentUser?.id }).first else { return }
+        COLLECTION_USERS.document(partnerUid).getDocument { snapshot, err in
+            if let err = err {
+                print(err.localizedDescription)
+                return
+            }
+            
+            guard let partnerUser = try? snapshot?.data(as: User.self) else { return }
+            
+            self.partnerUser = partnerUser
+        }
+    }
+    
+    // MARK: - 리스너 시작
     func startListen() {
         if shouldListen {
             guard let cid = chat.id else { return }
@@ -93,6 +112,7 @@ class ConversationViewModel: ObservableObject {
         }
     }
     
+    // MARK: - 리스너 종료
     func stopListen() {
         listener?.remove()
     }

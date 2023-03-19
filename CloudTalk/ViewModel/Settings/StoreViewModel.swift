@@ -8,10 +8,13 @@
 import StoreKit
 import Firebase
 
+@MainActor
 class StoreViewModel: NSObject, ObservableObject {
     
     @Published var products = [SKProduct]()
     @Published var currentPoint = AuthViewModel.shared.currentUser?.point ?? 0
+    @Published var isLoading = false
+    @Published var showFailAlert = false
     
     private let productIdentifiers: Set<String> = ["com.test.point1", "com.jerry.point2", "com.jerry.point3", "com.jerry.point4", "com.jerry.point5"]
     private var productRequest: SKProductsRequest?
@@ -39,19 +42,28 @@ extension StoreViewModel: SKProductsRequestDelegate {
 }
 
 extension StoreViewModel: SKPaymentTransactionObserver {
+        
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
             switch transaction.transactionState {
             case .purchased:
                 self.complete(transaction: transaction)
+                print("구매했다.")
+                isLoading = false
             case .restored:
                 self.restore(transaction: transaction)
+                print("복원했다.")
+                isLoading = false
             case .failed:
                 self.failed(transaction: transaction)
+                print("실패했다.")
+                isLoading = false
+                showFailAlert = true
             case .deferred:
                 self.deferred(transaction: transaction)
+                isLoading = false
             case .purchasing:
-                break
+                print("결제시트가 올라왔습니다.")
             @unknown default:
                 fatalError()
             }
@@ -80,6 +92,7 @@ extension StoreViewModel: SKPaymentTransactionObserver {
         if let error = transaction.error as? SKError, error.code != .paymentCancelled {
             // 실패 처리
             print("결제에 실패하였습니다.")
+            print(error.localizedDescription)
         }
         self.paymentQueue.finishTransaction(transaction)
     }
@@ -94,6 +107,8 @@ extension StoreViewModel: SKPaymentTransactionObserver {
 extension StoreViewModel {
     
     func buyPoint(productID: String) {
+        print("구매버튼을 눌렀습니다.")
+        isLoading = true
         if SKPaymentQueue.canMakePayments() {
             let paymentRequest = SKMutablePayment()
             paymentRequest.productIdentifier = productID
@@ -123,6 +138,25 @@ extension StoreViewModel {
         ]) { _ in
             AuthViewModel.shared.fetchUser()
             self.currentPoint += point
+        }
+    }
+}
+
+// MARK: - SKPaymentQueueDelegate
+extension StoreViewModel: SKPaymentQueueDelegate {
+    
+    func paymentQueue(_ queue: SKPaymentQueue, shouldAddStorePayment payment: SKPayment, for product: SKProduct) -> Bool {
+        print("dfalksjdflkasjdflkjsadlkj")
+        return true
+    }
+    
+    func paymentQueue(_ queue: SKPaymentQueue, didFinishWithError error: Error?) {
+        if let error = error {
+            // 결제 오류 처리
+            print("결제에 실패하였습니다. 오류: \(error.localizedDescription)")
+        } else {
+            // 결제 완료 처리
+            print("결제가 완료되었습니다.")
         }
     }
 }

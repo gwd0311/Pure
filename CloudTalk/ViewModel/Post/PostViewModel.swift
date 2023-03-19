@@ -9,6 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestoreSwift
 
+@MainActor
 class PostViewModel: ObservableObject {
     
     @Published var posts = [Post]()
@@ -70,28 +71,44 @@ class PostViewModel: ObservableObject {
     }
     
     private func setQueriedPosts() {
-        self.queriedPosts = self.posts.filter({ $0.age >= Int(ageRange.lowerBound) && $0.age <= Int(ageRange.upperBound) })
+        let lowerBound = Int(ageRange.lowerBound)
+        let upperBound = Int(ageRange.upperBound)
+        
+        if lowerBound == 18 && upperBound == 99 {
+            self.queriedPosts = self.posts.filter({ $0.age >= -1 && $0.age <= upperBound })
+        } else {
+            self.queriedPosts = self.posts.filter({ $0.age >= lowerBound && $0.age <= upperBound })
+        }
     }
     
     private func fetchPosts() async {
-        
+            
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
             .limit(to: 10 + AuthViewModel.shared.blackUids.count)
             .getDocuments()
-                
+                    
         guard let documents = snapshot?.documents else { return }
-                        
+                            
         let posts = documents.compactMap { try? $0.data(as: Post.self) }
             .filter({ !AuthViewModel.shared.blackUids.contains($0.uid) })
         
-        DispatchQueue.main.async {
-            self.posts.removeAll()
-            self.posts = posts
-            self.setQueriedPosts()
+        var newPosts = [Post]()
+        
+        for post in posts {
+            if let user = try? await fetchUser(post: post) {
+                var newPost = post
+                newPost.user = user
+                newPosts.append(newPost)
+            }
         }
         
+        DispatchQueue.main.async {
+            self.posts = newPosts
+            self.setQueriedPosts()
+        }
     }
+
     
     func fetchMorePosts(post: Post) async {
         guard post.id == posts.last?.id else { return }
@@ -128,6 +145,10 @@ class PostViewModel: ObservableObject {
             self.queriedPosts.removeAll()
             self.posts.removeAll()
         }
-        
+    }
+    
+    func fetchUser(post: Post) async throws -> User {
+        let user = try? await COLLECTION_USERS.document(post.uid).getDocument(as: User.self)
+        return user ?? MOCK_USER
     }
 }

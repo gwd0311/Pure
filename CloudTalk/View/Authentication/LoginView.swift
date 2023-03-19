@@ -15,6 +15,7 @@ struct LoginView: View {
     @State private var showPhoneRegisterView = false
     @State private var imageData: Data? = nil
     @State private var showGif = false
+    @State private var isLoading = false
     
     var body: some View {
         NavigationView {
@@ -41,15 +42,15 @@ struct LoginView: View {
                             .frame(width: 280, height: 280)
                     }
                     
-                    Image("cloudtalk")
-                        .padding(.bottom, 20)
+                    Image("textlogo")
+                        .padding(.bottom, 8)
                     
                     VStack {
-                        Text("가까운 동네친구 찾기")
+                        Text("편견없는 대화를 원한다면")
                             .font(.system(size: 26, weight: .black))
                             .padding(.top, 44)
                             .padding(.bottom, 14)
-                        Text("구름톡에서 연령, 성별, 지역별로 자유롭게\n마음이 맞는 친구들을 찾아보세요!")
+                        Text("퓨어에서는 직업을 바로 공개하지 않고\n채팅을 할수록 상대방의 직업을 알 수 있어요!")
                             .font(.system(size: 15, weight: .light))
                             .foregroundColor(ColorManager.black400)
                             .multilineTextAlignment(.center)
@@ -57,6 +58,8 @@ struct LoginView: View {
                         appleLoginButton
                             .padding(.bottom, 6)
                         phoneLoginButton
+                        Spacer()
+                        Spacer()
                     }
                     .frame(maxWidth: .infinity)
                     .background(.white)
@@ -71,6 +74,9 @@ struct LoginView: View {
                 self.showGif = false
             }
         }
+        .overlay(
+            isLoading ? LoadingView() : nil
+        )
     }
     
     private var phoneLoginButton: some View {
@@ -93,9 +99,8 @@ struct LoginView: View {
                     .stroke(lineWidth: 2)
                     .foregroundColor(ColorManager.black150)
             )
-            .padding(.horizontal, 30)
-            .padding(.bottom, 130)
         }
+        .padding(.horizontal, 30)
     }
     
     private var appleLoginButton: some View {
@@ -104,7 +109,9 @@ struct LoginView: View {
             viewModel.nonce = viewModel.randomNonceString()
             request.requestedScopes = [.email, .fullName]
             request.nonce = viewModel.sha256(viewModel.nonce)
+            isLoading = true
         } onCompletion: { result in
+            isLoading = false
             // 성공 or 실패 결과 받기
             switch result {
             case .success(let user):

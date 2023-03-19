@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Introspect
 
 struct MainTabView: View {
     
@@ -15,26 +16,44 @@ struct MainTabView: View {
     @State private var isNewChat = false
     @State private var showNetworkAlert = false
     
+    @ObservedObject var mainViewModel = MainViewModel()
+    @ObservedObject var postViewModel = PostViewModel()
+    @ObservedObject var chatViewModel = ChatViewModel()
+    @ObservedObject var likeViewModel = LikeViewModel()
     private let deviceWidth = UIScreen.main.bounds.size.width - 32
     
     var body: some View {
+        VStack {
+            NavigationView {
+                content
+            }
+            .tint(.black)
+        }
+        .onAppear {
+            viewModel.fetchUser()
+            viewModel.checkBanList { isBan in
+                if isBan {
+                    self.showBanAlert.toggle()
+                }
+            }
+            viewModel.checkNewChat { isNew in
+                self.isNewChat = isNew
+            }
+        }
+        .edgesIgnoringSafeArea(.bottom)
+    }
+    
+    private var content: some View {
         ZStack(alignment: .bottom) {
             Color.white.edgesIgnoringSafeArea(.all)
-            selectedView
+            VStack(spacing: 0) {
+                selectedView
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(height: 38)
+            }
             Group {
-                VStack {
-                    Spacer()
-                    Rectangle()
-                        .foregroundColor(.red)
-                        .frame(height: 58)
-                        .shadow(color: ColorManager.shadow.opacity(0.08), radius: 4, x: 0, y: 1)
-                }
-                .padding(.bottom, 20)
                 VStack(spacing: 0) {
-                    if tabIndex == .main || tabIndex == .post {
-                        AdaptiveBanner()
-                            .frame(height: 58)
-                    }
                     Rectangle()
                         .foregroundColor(ColorManager.black30)
                         .frame(height: 1)
@@ -51,6 +70,7 @@ struct MainTabView: View {
                     .padding(.horizontal, 16)
                     .background(ColorManager.tabBar)
                     Text("")
+                        .hidden()
                         .alert(isPresented: $showBanAlert, content: {
                             Alert(title: Text("알림"), message: Text("서비스 이용 중 정책을 위반한 사례가 발견되어 영구정지되었습니다.\n문의사항이 있으실 경우 gwd0311@naver.com으로 문의바랍니다."), dismissButton: .default(Text("확인"), action: {
                                 viewModel.systemOff()
@@ -59,33 +79,28 @@ struct MainTabView: View {
                 }
             }
         }
-        .onAppear {
-            viewModel.fetchUser()
-            viewModel.checkBanList { isBan in
-                if isBan {
-                    self.showBanAlert.toggle()
-                }
-            }
-            viewModel.checkNewChat { isNew in
-                self.isNewChat = isNew
-            }
-        }
         .edgesIgnoringSafeArea(.bottom)
     }
     
     private var selectedView: some View {
-        VStack {
-            switch tabIndex {
-            case .main:
-                MainView()
-            case .post:
-                PostView()
-            case .chat:
-                ChatView(viewModel: ChatViewModel())
-            case .like:
-                LikeView()
-            case .settings:
-                SettingsView()
+        TabView(selection: $tabIndex) {
+            MainView(viewModel: mainViewModel)
+                .tag(TabIndex.main)
+            PostView(viewModel: postViewModel)
+                .tag(TabIndex.post)
+            ChatView(viewModel: chatViewModel)
+                .tag(TabIndex.chat)
+            LikeView(viewModel: likeViewModel)
+                .tag(TabIndex.like)
+            SettingsView()
+                .tag(TabIndex.settings)
+        }
+        .onChange(of: tabIndex) { newValue in
+            viewModel.checkNewChat { isNew in
+                self.isNewChat = isNew
+            }
+            Task {
+                await likeViewModel.fetchLikes()
             }
         }
     }
@@ -178,16 +193,16 @@ struct MainTabView: View {
     }
 }
 
-struct MainTabView_Previews: PreviewProvider {
-    static var previews: some View {
-        
-        let model = AuthViewModel()
-        
-        MainTabView()
-            .environmentObject(model)
-            .environmentObject(model.interstitialAd)
-    }
-}
+//struct MainTabView_Previews: PreviewProvider {
+//    static var previews: some View {
+//
+//        let model = AuthViewModel()
+//
+//        MainTabView()
+//            .environmentObject(model)
+//            .environmentObject(model.interstitialAd)
+//    }
+//}
 
 enum TabIndex {
     case main, post, chat, like, settings

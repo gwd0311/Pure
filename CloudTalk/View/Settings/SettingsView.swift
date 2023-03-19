@@ -188,7 +188,7 @@ struct SettingsView: View {
                 Divider()
                     .foregroundColor(ColorManager.black100)
                 makeAppVersionContent(imageName: "setting7", title: "앱버전", content: {
-                    Text("1.0.0")
+                    Text("1.1.0")
                         .font(.system(size: 16, weight: .light))
                         .foregroundColor(ColorManager.black400)
                 })
@@ -320,30 +320,30 @@ struct SettingsView: View {
             // TODO: 프로필 편집 페이지로 이동
             ProfileEditView(isModalActive: $isModalActive)
         }, label: {
-                ProfileImageView(
-                    profileImageUrl: user.profileImageUrl,
-                    gender: user.gender,
-                    type: .roundRect,
-                    width: 136,
-                    height: 136,
-                    radius: 40
-                )
-                .shadow(color: ColorManager.black500.opacity(0.08), radius: 8, x: 0, y: 0)
-                .overlay(
-                    Circle()
-                        .foregroundColor(.white)
-                        .frame(width: 40, height: 40)
-                        .overlay(
-                            Circle()
-                                .stroke(lineWidth: 1.5)
-                                .foregroundColor(ColorManager.black100)
-                        )
-                        .overlay(
-                            Image("edit")
-                        )
-                        .offset(x: 7, y: 7)
-                    , alignment: .bottomTrailing
-                )
+            ProfileImageView(
+                profileImageUrl: user.profileImageUrl,
+                gender: user.gender,
+                type: .roundRect,
+                width: 136,
+                height: 136,
+                radius: 40
+            )
+            .shadow(color: ColorManager.black500.opacity(0.08), radius: 8, x: 0, y: 0)
+            .overlay(
+                Circle()
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Circle()
+                            .stroke(lineWidth: 1.5)
+                            .foregroundColor(ColorManager.black100)
+                    )
+                    .overlay(
+                        Image("edit")
+                    )
+                    .offset(x: 7, y: 7)
+                , alignment: .bottomTrailing
+            )
         }, isModalActive: $isModalActive)
     }
 }

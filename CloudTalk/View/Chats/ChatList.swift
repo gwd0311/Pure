@@ -11,16 +11,18 @@ struct ChatList: View {
     @Binding var messages: [Message]
     let profileImageUrl: String
     let gender: Gender
+    let partnerUser: User
     
     @State var previousDate: Date = Date.distantPast
     
     var body: some View {
-        LazyVStack(spacing: 0) {
+        VStack(spacing: 0) {
             ForEach(0 ..< messages.count, id: \.self) { index in
                 MessageView(
                     message: self.messages[index],
                     profileImageUrl: profileImageUrl,
                     gender: gender,
+                    partnerUser: partnerUser,
                     previousDate: index == 0 ? nil : self.messages[index - 1].date,
                     shouldShowTime: shouldShowTime(for: self.messages[index], in: messages)
                 )

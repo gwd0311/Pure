@@ -36,11 +36,15 @@ struct ConversationView: View {
                         makeProfiles()
                             .padding(.top, 16)
                             .padding(.bottom, 18)
-                        ChatList(
-                            messages: $viewModel.messages,
-                            profileImageUrl: viewModel.partnerProfileImageUrl,
-                            gender: viewModel.partnerGender
-                        )
+                        if let partnerUser = viewModel.partnerUser {
+                            ChatList(
+                                messages: $viewModel.messages,
+                                profileImageUrl: viewModel.partnerProfileImageUrl,
+                                gender: viewModel.partnerGender,
+                                partnerUser: partnerUser
+                            )
+                        }
+                        
                         if chat.uids.count == 1 {
                             // TODO: 상대방이 대화를 종료했습니다.
                             Text("상대방이 대화를 종료했습니다.")
@@ -181,10 +185,18 @@ struct ConversationView: View {
                 Text(viewModel.partnerNickName)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(ColorManager.blue)
-                Text("\(viewModel.partnerAge)세 \(viewModel.partnerGender.title)")
+                Text("\(getAgeContent()) \(viewModel.partnerGender.title)")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(ColorManager.black200)
             }
+        }
+    }
+    
+    private func getAgeContent() -> String {
+        if self.viewModel.partnerAge == -1 {
+            return "비공개"
+        } else {
+            return "\(self.viewModel.partnerAge)세"
         }
     }
     

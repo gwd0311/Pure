@@ -11,6 +11,7 @@ import GoogleMobileAds
 // test: ca-app-pub-3940256099942544/2934735716
 // oper: ca-app-pub-6301096399153807/8177497632
 
+@MainActor
 final class AdaptiveBannerViewController: UIViewController {
 
     private var adView: GADBannerView!
