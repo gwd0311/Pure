@@ -14,7 +14,8 @@
 | 메시지보내기 | 필터 기능 | 밀어서 새로고침 |
 |![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 35 44](https://user-images.githubusercontent.com/64826110/226227110-8ee2c1f5-6ac6-4161-b636-42f404401f26.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 37 17](https://user-images.githubusercontent.com/64826110/226227272-4d86db21-34b7-47ed-8f58-4cfcfcfbd61a.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 37 56](https://user-images.githubusercontent.com/64826110/226227324-92802679-a9c5-4c30-b040-5f8c762faeca.gif)|
 | 좋아요보내기 | 채팅할수록 직업 블러 연하게하기 | 게시물 올리기 |
-|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 56 28](https://user-images.githubusercontent.com/64826110/226229277-12c9a445-bdbf-4fb6-b4a0-6ae0bf5998d1.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 58 40](https://user-images.githubusercontent.com/64826110/226229494-05bf926d-61f0-483a-8234-2a5d5b671c44.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 10 50](https://user-images.githubusercontent.com/64826110/226230779-00718447-c330-4872-82e2-0253c738fe6b.gif)|
+|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 56 28](https://user-images.githubusercontent.com/64826110/226229277-12c9a445-bdbf-4fb6-b4a0-6ae0bf5998d1.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 15 19](https://user-images.githubusercontent.com/64826110/226231257-0f969811-09f2-4117-8847-8a09831bed49.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 10 50](https://user-images.githubusercontent.com/64826110/226230779-00718447-c330-4872-82e2-0253c738fe6b.gif)|
+
 
 
 
