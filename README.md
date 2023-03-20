@@ -16,9 +16,22 @@
 | 좋아요보내기 | 채팅할수록 직업 블러 연하게하기 | 게시물 올리기 |
 |![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 56 28](https://user-images.githubusercontent.com/64826110/226229277-12c9a445-bdbf-4fb6-b4a0-6ae0bf5998d1.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 15 19](https://user-images.githubusercontent.com/64826110/226231257-0f969811-09f2-4117-8847-8a09831bed49.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 10 50](https://user-images.githubusercontent.com/64826110/226230779-00718447-c330-4872-82e2-0253c738fe6b.gif)|
 
+
 ## ⚒️ 기술적 도전
 ### MVVM Architecture
+- 뷰와 관련된 로직과 비즈니스 로직을 분리하고 싶어 도입하였습니다.
+- 각 계층이 명확하게 분리되어있기 때문에 테스트 및 유지보수가 용이해집니다.
 
+### SwiftConcurrency
+- 기존의 콜백 방식에 의해 가독성이 떨어지는 부분을 보완할 수 있습니다.
+- Swift Concurrency를 사용해서 코드를 작성하면 스레드 개수가 코어 수보다 늘어나지 않기 때문에 `thread explosion`이 미연에 방지되는 장점이 있습니다.
+- 에러 핸들링을 보다 간편하게 할 수 있습니다.
+
+# Firebase
+- 인증 시스템을 지원합니다.
+- Combine과 Swift Concurrency를 지원합니다.
+- 서버를 간편하게 제작할 수 있습니다.
+- 푸쉬알림을 간편하게 구현할 수 있는 FCM을 지원합니다.
 
 
 
