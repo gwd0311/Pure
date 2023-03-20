@@ -27,7 +27,7 @@
 - Swift Concurrency를 사용해서 코드를 작성하면 스레드 개수가 코어 수보다 늘어나지 않기 때문에 `thread explosion`이 미연에 방지되는 장점이 있습니다.
 - 에러 핸들링을 보다 간편하게 할 수 있습니다.
 
-# Firebase
+### Firebase
 - 인증 시스템을 지원합니다.
 - Combine과 Swift Concurrency를 지원합니다.
 - 서버를 간편하게 제작할 수 있습니다.
