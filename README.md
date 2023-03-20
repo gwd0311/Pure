@@ -16,7 +16,8 @@
 | 좋아요보내기 | 채팅할수록 직업 블러 연하게하기 | 게시물 올리기 |
 |![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 10 56 28](https://user-images.githubusercontent.com/64826110/226229277-12c9a445-bdbf-4fb6-b4a0-6ae0bf5998d1.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 15 19](https://user-images.githubusercontent.com/64826110/226231257-0f969811-09f2-4117-8847-8a09831bed49.gif)|![Simulator Screen Recording - iPhone 14 Pro - 2023-03-20 at 11 10 50](https://user-images.githubusercontent.com/64826110/226230779-00718447-c330-4872-82e2-0253c738fe6b.gif)|
 
-
+## ⚒️ 기술적 도전
+### MVVM Architecture
 
 
 
