@@ -9,7 +9,7 @@ import Foundation
 
 class BlackListViewModel: ObservableObject {
     
-    @Published var blackUsers = [User]()
+    @Published var blackUsers = [AppUser]()
     
     init() {
         Task {
@@ -25,7 +25,7 @@ class BlackListViewModel: ObservableObject {
         
         for uid in uids {
             let snapshot = try? await COLLECTION_USERS.document(uid).getDocument()
-            guard let user = try? snapshot?.data(as: User.self) else { return }
+            guard let user = try? snapshot?.data(as: AppUser.self) else { return }
             DispatchQueue.main.async {
                 self.blackUsers.append(user)
             }

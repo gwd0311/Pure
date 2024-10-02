@@ -89,7 +89,7 @@ struct RegistrationView: View {
     }
     
     // MARK: - input 버튼들
-    @ViewBuilder private func makeInputButtons(user: User) -> some View {
+    @ViewBuilder private func makeInputButtons(user: AppUser) -> some View {
         VStack(spacing: 0) {
             ProfileInputButton(title: "닉네임", content: self.nickName ?? "", onClick: {
                 self.modalStatus = .nickName

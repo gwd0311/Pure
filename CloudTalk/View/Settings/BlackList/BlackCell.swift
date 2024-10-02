@@ -11,8 +11,8 @@ import Kingfisher
 struct BlackCell: View {
     
     @EnvironmentObject var authViewModel: AuthViewModel
-    @Binding var blackUsers: [User]
-    let user: User
+    @Binding var blackUsers: [AppUser]
+    let user: AppUser
     
     var body: some View {
         HStack(spacing: 0) {
@@ -57,7 +57,7 @@ struct BlackCell: View {
     
     
     // MARK: - 성별, 나이, 지역
-    @ViewBuilder private func makeGenderAgeRegion(user: User) -> some View {
+    @ViewBuilder private func makeGenderAgeRegion(user: AppUser) -> some View {
         HStack(spacing: 4) {
             Text(user.gender.title)
                 .foregroundColor(user.gender == .man ? ColorManager.blue : ColorManager.pink)
@@ -75,7 +75,7 @@ struct BlackCell: View {
     }
     
     // MARK: - 프로필 이미지
-    @ViewBuilder private func makeProfileImage(user: User) -> some View {
+    @ViewBuilder private func makeProfileImage(user: AppUser) -> some View {
         Group {
             if !user.profileImageUrl.isEmpty {
                 Color.clear

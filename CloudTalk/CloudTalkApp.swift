@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseAuth
 import FirebaseMessaging
 import AppTrackingTransparency
 import AdSupport
 import GoogleMobileAds
+import FirebaseCore
 
 @main
 struct CloudTalkApp: App {

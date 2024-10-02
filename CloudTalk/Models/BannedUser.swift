@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 struct BannedUser: Identifiable, Decodable {
     @DocumentID var id: String?

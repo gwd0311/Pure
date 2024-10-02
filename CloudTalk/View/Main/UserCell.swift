@@ -11,7 +11,7 @@ import Firebase
 
 struct UserCell: View {
     
-    let user: User
+    let user: AppUser
     
     var body: some View {
         HStack(spacing: 16) {

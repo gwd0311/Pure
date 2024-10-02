@@ -10,7 +10,7 @@ import SwiftUI
 class CommentViewModel: ObservableObject {
     
     let comment: Comment
-    @Published var user: User?
+    @Published var user: AppUser?
     
     init(comment: Comment) {
         self.comment = comment
@@ -24,7 +24,7 @@ class CommentViewModel: ObservableObject {
         
         let snapshot = try? await COLLECTION_USERS.document(uid).getDocument()
             
-        guard let user = try? snapshot?.data(as: User.self) else { return }
+        guard let user = try? snapshot?.data(as: AppUser.self) else { return }
         
         DispatchQueue.main.async {
             withAnimation {

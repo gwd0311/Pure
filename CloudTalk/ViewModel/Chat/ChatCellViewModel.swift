@@ -11,7 +11,7 @@ import Foundation
 class ChatCellViewModel: ObservableObject {
     
     let chat: Chat
-    @Published var user: User?
+    @Published var user: AppUser?
     
     init(chat: Chat) {
         self.chat = chat
@@ -28,7 +28,7 @@ class ChatCellViewModel: ObservableObject {
                 print(err.localizedDescription)
             }
             
-            guard let user = try? snapshot?.data(as: User.self) else { return }
+            guard let user = try? snapshot?.data(as: AppUser.self) else { return }
             
             self.user = user
         }

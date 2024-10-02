@@ -7,7 +7,6 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct Report: Identifiable, Decodable {
     @DocumentID var id: String?

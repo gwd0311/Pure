@@ -7,7 +7,6 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct Post: Identifiable, Decodable {
     @DocumentID var id: String?
@@ -21,7 +20,7 @@ struct Post: Identifiable, Decodable {
     let profileImageUrl: String
     let postImageUrl: String
     let timestamp: Timestamp
-    var user: User?
+    var user: AppUser?
 }
 
 let MOCK_POST = Post(

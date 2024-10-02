@@ -5,7 +5,7 @@
 //  Created by hanjongwoo on 2023/02/23.
 //
 
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 struct Token: Identifiable, Decodable {
     @DocumentID var id: String?

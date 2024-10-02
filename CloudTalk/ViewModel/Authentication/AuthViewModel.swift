@@ -11,14 +11,13 @@ import SwiftUI
 import CryptoKit
 import AuthenticationServices
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 import FirebaseStorage
 
 class AuthViewModel: NSObject, ObservableObject {
     
     @Published var nonce = ""
-    @Published var userSession: Firebase.User?
-    @Published var currentUser: User?
+    @Published var userSession: User?
+    @Published var currentUser: AppUser?
     @Published var verificationId: String = ""
     
     @Published var isPushOn = true
@@ -445,7 +444,7 @@ class AuthViewModel: NSObject, ObservableObject {
                 print(err.localizedDescription)
                 return
             }
-            guard let user = try? snapshot?.data(as: User.self) else {
+            guard let user = try? snapshot?.data(as: AppUser.self) else {
                 return
             }
             self.currentUser = user

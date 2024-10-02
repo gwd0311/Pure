@@ -7,7 +7,6 @@
 
 import Foundation
 import Firebase
-import FirebaseFirestoreSwift
 
 @MainActor
 class ConversationViewModel: ObservableObject {
@@ -17,7 +16,7 @@ class ConversationViewModel: ObservableObject {
     @Published var messages = [Message]()
     var shouldListen = true
     var lastMessageTime: Date?
-    @Published var partnerUser: User?
+    @Published var partnerUser: AppUser?
     
     private var listener: ListenerRegistration?
     
@@ -79,7 +78,7 @@ class ConversationViewModel: ObservableObject {
                 return
             }
             
-            guard let partnerUser = try? snapshot?.data(as: User.self) else { return }
+            guard let partnerUser = try? snapshot?.data(as: AppUser.self) else { return }
             
             self.partnerUser = partnerUser
         }
@@ -152,7 +151,7 @@ class ConversationViewModel: ObservableObject {
                     return
                 }
                 
-                guard let partnerUser = try? snapshot?.data(as: User.self) else { return }
+                guard let partnerUser = try? snapshot?.data(as: AppUser.self) else { return }
                 
                 if partnerUser.isPushOn {
                     self.sendPushMessage(chatPartnerId: self.partnerUid)

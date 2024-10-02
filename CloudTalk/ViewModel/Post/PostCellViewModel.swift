@@ -7,14 +7,13 @@
 
 import SwiftUI
 import Firebase
-import FirebaseFirestoreSwift
 
 @MainActor
 class PostCellViewModel: ObservableObject {
 
     var post: Post
     @Published var comments = [Comment]()
-    @Published var user: User?
+    @Published var user: AppUser?
     @Published var isHeartPressed = false
     @Published var heartCount = 0
     @Published var commentCount = 0
@@ -79,7 +78,7 @@ class PostCellViewModel: ObservableObject {
     private func fetchUser() async {
         let snapShot = try? await COLLECTION_USERS.document(post.uid).getDocument()
         
-        guard let user = try? snapShot?.data(as: User.self) else { return }
+        guard let user = try? snapShot?.data(as: AppUser.self) else { return }
         DispatchQueue.main.async {
             withAnimation {
                 self.user = user
@@ -87,8 +86,8 @@ class PostCellViewModel: ObservableObject {
         }
     }
     
-    private func getUser(comment: Comment) async throws -> User {
-        let user = try? await COLLECTION_USERS.document(comment.uid).getDocument(as: User.self)
+    private func getUser(comment: Comment) async throws -> AppUser {
+        let user = try? await COLLECTION_USERS.document(comment.uid).getDocument(as: AppUser.self)
         return user ?? MOCK_USER
     }
     

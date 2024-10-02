@@ -64,9 +64,9 @@ class LikeViewModel: ObservableObject {
         self.receivedLikes.append(contentsOf: likeCards)
     }
     
-    private func fetchUser(withUid uid: String, completion: @escaping (User) -> Void) {
+    private func fetchUser(withUid uid: String, completion: @escaping (AppUser) -> Void) {
         COLLECTION_USERS.document(uid).getDocument { snapshot, _ in
-            guard let user = try? snapshot?.data(as: User.self) else { return }
+            guard let user = try? snapshot?.data(as: AppUser.self) else { return }
             completion(user)
         }
     }

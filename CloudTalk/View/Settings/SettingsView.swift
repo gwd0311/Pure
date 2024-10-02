@@ -315,7 +315,7 @@ struct SettingsView: View {
     }
     
     // MARK: - 프로필 편집 버튼 (편집 페이지로 이동)
-    @ViewBuilder private func makeProfileImageButton(user: User) -> some View {
+    @ViewBuilder private func makeProfileImageButton(user: AppUser) -> some View {
         CustomNavigationLink(destination: {
             // TODO: 프로필 편집 페이지로 이동
             ProfileEditView(isModalActive: $isModalActive)

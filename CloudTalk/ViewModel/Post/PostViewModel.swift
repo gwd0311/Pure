@@ -7,7 +7,6 @@
 
 import Foundation
 import Firebase
-import FirebaseFirestoreSwift
 
 @MainActor
 class PostViewModel: ObservableObject {
@@ -147,8 +146,8 @@ class PostViewModel: ObservableObject {
         }
     }
     
-    func fetchUser(post: Post) async throws -> User {
-        let user = try? await COLLECTION_USERS.document(post.uid).getDocument(as: User.self)
+    func fetchUser(post: Post) async throws -> AppUser {
+        let user = try? await COLLECTION_USERS.document(post.uid).getDocument(as: AppUser.self)
         return user ?? MOCK_USER
     }
 }

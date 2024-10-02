@@ -7,7 +7,6 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct Chat: Identifiable, Decodable, Sequence {
     @DocumentID var id: String?

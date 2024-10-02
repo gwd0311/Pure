@@ -10,11 +10,11 @@ import Kingfisher
 
 struct DetailView: View {
     
-    let user: User
+    let user: AppUser
     let ableToNavigate: Bool
     @ObservedObject var viewModel: DetailViewModel
     
-    init(user: User, ableToNavigate: Bool = true) {
+    init(user: AppUser, ableToNavigate: Bool = true) {
         self.user = user
         self.ableToNavigate = ableToNavigate
         self.viewModel = DetailViewModel(user: user)
@@ -97,7 +97,7 @@ struct DetailView: View {
     }
     
     // MARK: - NavLinks
-    @ViewBuilder private func makeNavLinks(user: User) -> some View {
+    @ViewBuilder private func makeNavLinks(user: AppUser) -> some View {
         VStack(spacing: 0) {
             CustomNavigationLink(destination: {
                 SendMessageView(viewModel: SendMessageViewModel(user: user), onDimiss: {
@@ -124,7 +124,7 @@ struct DetailView: View {
     }
     
     // MARK: - 프로필 이미지
-    @ViewBuilder private func makeImageSection(user: User) -> some View {
+    @ViewBuilder private func makeImageSection(user: AppUser) -> some View {
         Group {
             if !user.profileImageUrl.isEmpty {
                 Color.clear
@@ -154,7 +154,7 @@ struct DetailView: View {
     }
     
     // MARK: - 프로필 닉네임, 성별 등 상세정보
-    @ViewBuilder private func makeUpperSection(user: User) -> some View {
+    @ViewBuilder private func makeUpperSection(user: AppUser) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(user.nickname)
@@ -195,7 +195,7 @@ struct DetailView: View {
     }
     
     // MARK: - 내 소개 정보
-    @ViewBuilder private func makeLowerSection(user: User) -> some View {
+    @ViewBuilder private func makeLowerSection(user: AppUser) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("내 소개")
                 .font(.system(size: 16, weight: .bold))
@@ -208,7 +208,7 @@ struct DetailView: View {
     }
     
     // MARK: - 하단 좋아요 및 메시지 전송
-    @ViewBuilder private func makeBottomSection(user: User, isChatting: Bool?) -> some View {
+    @ViewBuilder private func makeBottomSection(user: AppUser, isChatting: Bool?) -> some View {
         HStack {
             Button {
                 // 좋아요 기능 구현

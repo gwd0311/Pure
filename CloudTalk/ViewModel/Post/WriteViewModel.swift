@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Firebase
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 import FirebaseStorage
 
 class WriteViewModel: ObservableObject {

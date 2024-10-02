@@ -7,12 +7,11 @@
 
 import Foundation
 import Firebase
-import FirebaseFirestoreSwift
 
 @MainActor
 class DetailViewModel: ObservableObject {
     
-    let user: User
+    let user: AppUser
     @Published var isHeartPressed = false
     @Published var isChatting: Bool?
     @Published var isLoading = false
@@ -24,7 +23,7 @@ class DetailViewModel: ObservableObject {
     }
     @Published var blurRadius: CGFloat = 10.0
     
-    init(user: User) {
+    init(user: AppUser) {
         self.user = user
         Task {
             try? await Task.sleep(nanoseconds: 0_500_000_000)

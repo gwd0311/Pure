@@ -10,7 +10,7 @@ import SwiftUI
 struct MessageView: View {
     
     @ObservedObject var viewModel: MessageViewModel
-    let partnerUser: User
+    let partnerUser: AppUser
     
     @State private var showModal = false
     
@@ -18,7 +18,7 @@ struct MessageView: View {
         message: Message,
         profileImageUrl: String,
         gender: Gender,
-        partnerUser: User,
+        partnerUser: AppUser,
         previousDate: Date? = nil,
         shouldShowTime: Bool
     ) {

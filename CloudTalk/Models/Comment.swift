@@ -7,7 +7,6 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct Comment: Identifiable, Decodable {
     @DocumentID var id: String?
@@ -18,7 +17,7 @@ struct Comment: Identifiable, Decodable {
     let gender: Gender
     let profileImageUrl: String
     let timestamp: Timestamp
-    var user: User?
+    var user: AppUser?
 }
 
 let MOCK_COMMENT = Comment(

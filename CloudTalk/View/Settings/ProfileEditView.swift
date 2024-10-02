@@ -100,7 +100,7 @@ struct ProfileEditView: View {
         }
     }
     
-    @ViewBuilder private func makeCompleteButton(user: User) -> some View {
+    @ViewBuilder private func makeCompleteButton(user: AppUser) -> some View {
         Button {
             // TODO: viewModel 수정이벤트 추가
             isLoading = true
@@ -193,7 +193,7 @@ struct ProfileEditView: View {
         }
     }
     
-    @ViewBuilder private func makeInputButtons(user: User) -> some View {
+    @ViewBuilder private func makeInputButtons(user: AppUser) -> some View {
         VStack(spacing: 0) {
             ProfileInputButton(title: "닉네임", content: self.nickName ?? "", onClick: {
                 self.modalStatus = .nickName

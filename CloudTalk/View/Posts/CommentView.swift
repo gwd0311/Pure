@@ -78,7 +78,7 @@ struct CommentView: View {
         }
     }
     
-    @ViewBuilder private func makeProfileImage(user: User) -> some View {
+    @ViewBuilder private func makeProfileImage(user: AppUser) -> some View {
         VStack {
             if !user.profileImageUrl.isEmpty {
                 Color.clear
@@ -112,7 +112,7 @@ struct CommentView: View {
         }
     }
     
-    @ViewBuilder private func makeNickname(user: User) -> some View {
+    @ViewBuilder private func makeNickname(user: AppUser) -> some View {
         HStack(spacing: 4) {
             Text(user.nickname)
                 .font(.system(size: 12, weight: .bold))

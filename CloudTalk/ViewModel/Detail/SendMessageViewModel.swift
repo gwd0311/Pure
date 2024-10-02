@@ -12,9 +12,9 @@ import Firebase
 class SendMessageViewModel: ObservableObject {
     
     
-    let user: User // DetailView에서 선택한 유저, toID에 적합
+    let user: AppUser // DetailView에서 선택한 유저, toID에 적합
     
-    init(user: User) {
+    init(user: AppUser) {
         self.user = user
     }
     
@@ -22,7 +22,7 @@ class SendMessageViewModel: ObservableObject {
     func checkPoint() async -> Bool {
         guard let uid = AuthViewModel.shared.currentUser?.id else { return false }
         
-        guard let user = try? await COLLECTION_USERS.document(uid).getDocument(as: User.self) else { return false }
+        guard let user = try? await COLLECTION_USERS.document(uid).getDocument(as: AppUser.self) else { return false }
         
         if user.point < 50 {
             return false

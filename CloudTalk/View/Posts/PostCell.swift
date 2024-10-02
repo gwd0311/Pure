@@ -94,7 +94,7 @@ struct PostCell: View {
     }
     
     // MARK: - 프로필 이미지
-    @ViewBuilder private func makeProfileImage(user: User) -> some View {
+    @ViewBuilder private func makeProfileImage(user: AppUser) -> some View {
         VStack {
             if !user.profileImageUrl.isEmpty {
                 Color.clear
@@ -129,7 +129,7 @@ struct PostCell: View {
     }
     
     // MARK: - 프로필 닉네임
-    @ViewBuilder private func makeProfileNickname(user: User) -> some View {
+    @ViewBuilder private func makeProfileNickname(user: AppUser) -> some View {
         HStack(spacing: 4) {
             CustomNavigationLink {
                 DetailView(user: user)
@@ -149,7 +149,7 @@ struct PostCell: View {
     }
     
     // MARK: - 프로필 상세정보
-    @ViewBuilder private func makeProfileDetailInfo(user: User) -> some View {
+    @ViewBuilder private func makeProfileDetailInfo(user: AppUser) -> some View {
         CustomNavigationLink {
             DetailView(user: user)
         } label: {

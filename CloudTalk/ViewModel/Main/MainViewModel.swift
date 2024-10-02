@@ -6,14 +6,14 @@
 //
 
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseFirestore
+import FirebaseAuth
 
 @MainActor
 class MainViewModel: ObservableObject {
     
-    @Published var users = [User]()
-    @Published var queriedUsers = [User]()
+    @Published var users = [AppUser]()
+    @Published var queriedUsers = [AppUser]()
     
     // 필터 정보들
     @Published var gender: Gender?
@@ -77,7 +77,7 @@ class MainViewModel: ObservableObject {
         
     }
     
-    private func getQueriedUsers(users: [User]) -> [User] {
+    private func getQueriedUsers(users: [AppUser]) -> [AppUser] {
         let lowerBound = Int(ageRange.lowerBound)
         let upperBound = Int(ageRange.upperBound)
         
@@ -89,7 +89,7 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    private func fetchUsers() async throws -> [User] {
+    private func fetchUsers() async throws -> [AppUser] {
         print("유저 가져오기 실행")
         let snapshot = try? await query
             .order(by: KEY_TIMESTAMP, descending: true)
@@ -98,7 +98,7 @@ class MainViewModel: ObservableObject {
                 
         guard let documents = snapshot?.documents else { return [] }
         
-        let users = documents.compactMap { try? $0.data(as: User.self) }
+        let users = documents.compactMap { try? $0.data(as: AppUser.self) }
             .filter { $0.id != Auth.auth().currentUser?.uid }
             .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
             .filter { $0.id != M_KEY}
@@ -110,7 +110,7 @@ class MainViewModel: ObservableObject {
         return self.getQueriedUsers(users: users)
     }
     
-    func fetchMoreUsers(user: User) async {
+    func fetchMoreUsers(user: AppUser) async {
         let blackUserCount = AuthViewModel.shared.blackUids.count
         guard user.id == queriedUsers.last?.id else { return }
         print("더 가져오기 실행")
@@ -124,7 +124,7 @@ class MainViewModel: ObservableObject {
         
         guard let documents = snapshot?.documents else { return }
         
-        let users = documents.compactMap { try? $0.data(as: User.self) }
+        let users = documents.compactMap { try? $0.data(as: AppUser.self) }
             .filter { $0.id != Auth.auth().currentUser?.uid }
             .filter { !AuthViewModel.shared.blackUids.contains($0.id ?? "") }
             .filter { $0.id != M_KEY}

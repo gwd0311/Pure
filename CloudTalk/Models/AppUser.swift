@@ -7,10 +7,9 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 import SwiftUI
 
-struct User: Identifiable, Decodable {
+struct AppUser: Identifiable, Decodable {
     @DocumentID var id: String?
     let nickname: String
     let gender: Gender
@@ -176,7 +175,7 @@ enum Job: Int, CaseIterable, Codable, Identifiable {
     }
 }
 
-let MOCK_USER = User(
+let MOCK_USER = AppUser(
     id: "asdf",
     nickname: "삭제된계정",
     gender: .man,

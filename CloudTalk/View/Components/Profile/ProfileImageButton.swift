@@ -15,7 +15,7 @@ enum ProfileImageButtonMode {
 struct ProfileImageButton: View {
     
     let mode: ProfileImageButtonMode
-    let user: User
+    let user: AppUser
     @Binding var image: UIImage?
     @Binding var gender: Gender?
     @Binding var showImagePicker: Bool

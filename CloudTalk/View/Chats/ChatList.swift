@@ -11,7 +11,7 @@ struct ChatList: View {
     @Binding var messages: [Message]
     let profileImageUrl: String
     let gender: Gender
-    let partnerUser: User
+    let partnerUser: AppUser
     
     @State var previousDate: Date = Date.distantPast
     

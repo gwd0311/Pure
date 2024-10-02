@@ -7,14 +7,13 @@
 
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 struct LikeCard: Identifiable, Decodable {
     @DocumentID var id: String?
     let fromId: String
     let toId: String
     let timestamp: Timestamp
-    var user: User?
+    var user: AppUser?
 }
 
 let MOCK_LIKECARD = LikeCard(

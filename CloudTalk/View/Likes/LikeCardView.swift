@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LikeCardView: View {
     
-    let user: User
+    let user: AppUser
     
     var body: some View {
                 
